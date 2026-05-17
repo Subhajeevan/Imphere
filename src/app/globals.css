@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fonts loaded via next/font in layout.tsx */
+
+@layer base {
+  :root {
+    /* IMPHERE Luxury Civic Theme - Light Mode */
+    --background: 0 0% 100%;           /* #FFFFFF */
+    --foreground: 0 0% 10%;            /* #1A1A1A */
+
+    --card: 0 0% 98%;                  /* #F9F9F9 */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 43 72% 53%;             /* Gold #D4AF37 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;             /* Off-white */
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 43 72% 53%;              /* Gold accent */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;          /* Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;                /* #E5E5E5 */
+    --input: 0 0% 90%;
+    --ring: 43 72% 53%;                /* Gold ring */
+
+    --radius: 0.5rem;
+  }
+
+  /* Dark mode (future) */
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 43 72% 53%;
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 43 72% 53%;
+    --accent-foreground: 0 0% 10%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 43 72% 53%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  /* Gold button styles */
+  .btn-gold {
+    @apply bg-gold text-white font-medium px-4 py-2 rounded-lg
+           hover:bg-gold-dark transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+  }
+
+  .btn-gold-outline {
+    @apply border-2 border-gold text-gold bg-transparent font-medium px-4 py-2 rounded-lg
+           hover:bg-gold hover:text-white transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2;
+  }
+
+  /* Card styles */
+  .card-civic {
+    @apply bg-white rounded-lg border border-border p-4 shadow-sm;
+  }
+
+  /* Gold accented elements */
+  .gold-accent {
+    @apply text-gold;
+  }
+
+  .gold-icon {
+    @apply text-gold hover:text-gold-dark transition-colors;
+  }
+
+  .gold-icon-active {
+    @apply text-gold fill-gold;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}

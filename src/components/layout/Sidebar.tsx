@@ -1,0 +1,165 @@
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import {
+  Home,
+  Search,
+  Trophy,
+  Users,
+  User,
+  Bell,
+  ShoppingBag,
+  Settings,
+  Plus,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+const navItems = [
+  { href: '/', icon: Home, label: 'Home' },
+  { href: '/explore', icon: Search, label: 'Explore' },
+  { href: '/challenges', icon: Trophy, label: 'Challenges' },
+  { href: '/community', icon: Users, label: 'Community' },
+  { href: '/profile', icon: User, label: 'Profile' },
+]
+
+const secondaryItems = [
+  { href: '/notifications', icon: Bell, label: 'Notifications' },
+  { href: '/exchange', icon: ShoppingBag, label: 'Exchange' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
+]
+
+interface SidebarProps {
+  user?: {
+    displayName: string
+    avatarUrl?: string
+    standing: number
+    badge: string
+  }
+}
+
+export function Sidebar({ user }: SidebarProps) {
+  const pathname = usePathname()
+
+  return (
+    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border bg-white">
+      {/* Logo */}
+      <div className="p-6">
+        <Link href="/" className="block">
+          <Image
+            src="/logo-gold.png"
+            alt="IMPHERE"
+            width={180}
+            height={45}
+            priority
+            className="h-10 w-auto"
+          />
+        </Link>
+      </div>
+
+      {/* Primary Navigation */}
+      <nav className="flex-1 px-3">
+        <ul className="space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                    isActive
+                      ? 'bg-gold/10 text-gold font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+
+        {/* Create Post Button */}
+        <div className="mt-4 px-2">
+          <Link
+            href="/create"
+            className="flex items-center justify-center gap-2 w-full py-3 px-4
+                       bg-gold text-white font-medium rounded-lg
+                       hover:bg-gold-dark transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>New Post</span>
+          </Link>
+        </div>
+
+        {/* Divider */}
+        <div className="my-6 border-t border-border" />
+
+        {/* Secondary Navigation */}
+        <ul className="space-y-1">
+          {secondaryItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+                    isActive
+                      ? 'bg-gold/10 text-gold font-medium'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+
+      {/* User Profile Card */}
+      {user && (
+        <div className="p-4 border-t border-border">
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
+          >
+            <div
+              className={cn(
+                'w-10 h-10 rounded-full bg-muted flex items-center justify-center',
+                'ring-2',
+                user.badge === 'Gold' && 'ring-badge-gold',
+                user.badge === 'Silver' && 'ring-badge-silver',
+                user.badge === 'Bronze' && 'ring-badge-bronze',
+                user.badge === 'Citizen' && 'ring-badge-citizen'
+              )}
+            >
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-foreground truncate">
+                {user.displayName}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {user.standing.toLocaleString()} Standing
+              </p>
+            </div>
+          </Link>
+        </div>
+      )}
+    </aside>
+  )
+}
