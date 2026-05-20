@@ -4,7 +4,7 @@
 
 ## Overview
 
-IMPHERE is a civic engagement platform commissioned by a local MLA in India. The application enables citizens to complete community challenges, earn reputation (Standing), gain spendable currency (Impact Credits), and build their civic influence through verified real-world actions.
+IMPHERE is a civic engagement platform. The application enables citizens to complete community challenges, earn reputation (Standing), gain spendable currency (Impact Credits), and build their civic influence through verified real-world actions.
 
 ---
 
