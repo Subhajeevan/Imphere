@@ -95,7 +95,7 @@ export default function ExplorePage() {
   return (
     <AppLayout>
       {/* Search Header */}
-      <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border p-4">
+      <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border p-4 transition-colors duration-300">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input

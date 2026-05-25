@@ -17,7 +17,7 @@ const tabs: { id: FeedTab; label: string }[] = [
 
 export function FeedTabs({ activeTab, onChange }: FeedTabsProps) {
   return (
-    <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border">
+    <div className="sticky top-0 lg:top-0 z-40 bg-background border-b border-border transition-colors duration-300">
       <div className="flex">
         {tabs.map((tab) => (
           <button

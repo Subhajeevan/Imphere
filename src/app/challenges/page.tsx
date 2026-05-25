@@ -19,11 +19,12 @@ export default async function Page() {
     .eq('id', user.id)
     .single()
 
-  // Fetch challenge categories
+  // Fetch challenge categories (no 'slug' column in schema)
   const { data: categories } = await supabase
     .from('challenge_categories')
-    .select('id, name, slug, icon')
-    .order('name')
+    .select('id, name, icon, color')
+    .eq('is_active', true)
+    .order('display_order')
 
   return (
     <ChallengesPage

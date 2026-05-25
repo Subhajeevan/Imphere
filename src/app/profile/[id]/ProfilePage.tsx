@@ -102,7 +102,7 @@ export function ProfilePage({ profile, currentUser }: ProfilePageProps) {
   return (
     <AppLayout user={currentUser}>
       {/* Profile Header */}
-      <div className="bg-white border-b border-border">
+      <div className="bg-card border-b border-border transition-colors duration-300">
         {/* Avatar and Stats */}
         <div className="px-4 py-6">
           <div className="flex items-start gap-4">

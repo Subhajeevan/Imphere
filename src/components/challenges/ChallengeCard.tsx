@@ -65,7 +65,7 @@ export function ChallengeCard({
   const timeRemaining = getTimeRemaining()
 
   return (
-    <article className="p-4 border border-border rounded-lg bg-white hover:shadow-md transition-shadow">
+    <article className="p-4 border border-border rounded-lg bg-card hover:shadow-md transition-all duration-300">
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         {/* Category Icon */}
@@ -201,7 +201,7 @@ export function ChallengeCard({
  */
 export function ChallengeCardSkeleton() {
   return (
-    <article className="p-4 border border-border rounded-lg bg-white animate-pulse">
+    <article className="p-4 border border-border rounded-lg bg-card animate-pulse transition-colors duration-300">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-lg bg-muted" />
         <div className="flex-1">

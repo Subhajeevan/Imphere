@@ -20,7 +20,7 @@ interface MobileNavProps {
 
 export function MobileTopBar({ notificationCount = 0 }: MobileNavProps) {
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
+    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border transition-colors duration-300">
       <div className="flex items-center justify-between px-4 h-14">
         {/* Logo */}
         <Link href="/">
@@ -60,7 +60,7 @@ export function MobileBottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border safe-area-inset-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom transition-colors duration-300">
       <div className="flex items-center justify-around h-16">
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href

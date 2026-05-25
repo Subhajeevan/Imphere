@@ -34,7 +34,7 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
   return (
     <AppLayout user={user}>
       {/* Header */}
-      <div className="bg-white border-b border-border px-4 py-4">
+      <div className="bg-background border-b border-border px-4 py-4 transition-colors duration-300">
         <h1 className="text-xl font-serif font-bold text-foreground">
           Impact Circles
         </h1>
@@ -44,7 +44,7 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
       </div>
 
       {/* Create Circle Section */}
-      <div className="p-4">
+      <div className="py-4 px-4 sm:px-0">
         {canCreateCircle ? (
           <Link
             href="/community/create"
@@ -92,7 +92,7 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
       </div>
 
       {/* My Circles */}
-      <div className="p-4 pt-0">
+      <div className="pb-4 pt-0 px-4 sm:px-0">
         <h2 className="font-medium text-foreground mb-3 flex items-center gap-2">
           <Users className="w-4 h-4" />
           My Circles
@@ -148,7 +148,7 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
       </div>
 
       {/* Leaderboard */}
-      <div className="p-4 border-t border-border">
+      <div className="py-4 border-t border-border px-4 sm:px-0">
         <h2 className="font-medium text-foreground mb-3 flex items-center gap-2">
           <Trophy className="w-4 h-4 text-gold" />
           Regional Leaderboard

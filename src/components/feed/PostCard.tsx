@@ -73,7 +73,7 @@ export function PostCard({
   }
 
   return (
-    <article className="border-b border-border bg-white">
+    <article className="border-b border-border bg-card transition-colors duration-300">
       {/* Challenge Badge (if applicable) */}
       {challengeTitle && (
         <div className="px-4 pt-3 pb-1">
@@ -212,7 +212,7 @@ export function PostCard({
  */
 export function PostCardSkeleton() {
   return (
-    <article className="border-b border-border bg-white animate-pulse">
+    <article className="border-b border-border bg-card animate-pulse transition-colors duration-300">
       <div className="flex items-start gap-3 p-4 pb-2">
         <div className="w-10 h-10 rounded-full bg-muted" />
         <div className="flex-1">

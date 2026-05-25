@@ -67,10 +67,34 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const html = document.documentElement;
+                  const theme = localStorage.getItem('hs_theme') || 'auto';
+                  const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  
+                  if (isDark) {
+                    html.classList.add('dark');
+                    html.classList.remove('light');
+                  } else {
+                    html.classList.remove('dark');
+                    html.classList.add('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-background font-sans antialiased transition-colors duration-300">
         {children}
       </body>
     </html>
   )
 }
+

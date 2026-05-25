@@ -108,7 +108,7 @@ export function NotificationsPage({
   return (
     <AppLayout user={user}>
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border px-4 py-4">
+      <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border px-4 py-4 transition-colors duration-300">
         <h1 className="text-xl font-serif font-bold text-foreground">
           Notifications
         </h1>
