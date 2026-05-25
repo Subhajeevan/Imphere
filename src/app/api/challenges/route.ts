@@ -7,8 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
  *
  * Query params:
  * - type: 'welfare' | 'proclamation' | 'all'
- * - category: category slug
- * - locality: locality ID
+ * - category: single category ID (legacy)
+ * - categories: comma-separated category IDs (multi-select)
+ * - search: text search on title
  * - cursor: pagination cursor
  * - limit: number of results (default 20)
  */
@@ -21,9 +22,15 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'all'
-    const category = searchParams.get('category')
+    const categoriesParam = searchParams.get('categories') || searchParams.get('category')
+    const search = searchParams.get('search') || ''
     const cursor = searchParams.get('cursor')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
+
+    // Parse multi-category IDs
+    const categoryIds = categoriesParam
+      ? categoriesParam.split(',').map((id) => id.trim()).filter(Boolean)
+      : []
 
     let query = supabase
       .from('challenges')
@@ -63,15 +70,23 @@ export async function GET(request: NextRequest) {
       query = query.eq('type', 'proclamation')
     }
 
-    // Apply category filter
-    if (category) {
-      query = query.eq('category_id', category)
+    // Apply multi-category filter (uses Supabase .in())
+    if (categoryIds.length === 1) {
+      query = query.eq('category_id', categoryIds[0])
+    } else if (categoryIds.length > 1) {
+      query = query.in('category_id', categoryIds)
+    }
+
+    // Apply text search on title
+    if (search.trim()) {
+      query = query.ilike('title', `%${search.trim()}%`)
     }
 
     // Apply cursor for pagination
     if (cursor) {
       query = query.lt('id', cursor)
     }
+
 
     const { data: challenges, error } = await query
 
@@ -142,5 +157,69 @@ export async function GET(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     )
+  }
+}
+
+/**
+ * POST /api/challenges
+ * Raise a new Proclamation (community-raised challenge)
+ *
+ * Body: { title, description, categoryId?, localityName? }
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { title, description, categoryId, localityName } = body as {
+      title: string
+      description: string
+      categoryId?: string
+      localityName?: string
+    }
+
+    if (!title?.trim()) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+    if (!description?.trim()) {
+      return NextResponse.json({ error: 'Description is required' }, { status: 400 })
+    }
+
+    // Proclamations expire in 14 days
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { data: challenge, error } = await supabase
+      .from('challenges')
+      .insert({
+        type: 'proclamation',
+        title: title.trim(),
+        description: description.trim(),
+        category_id: categoryId || null,
+        locality_name: localityName?.trim() || null,
+        created_by: user.id,
+        expires_at: expiresAt,
+        status: 'active',
+        standing_reward: 100,
+        ic_reward: 50,
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('Proclamation insert error:', error)
+      return NextResponse.json({ error: 'Failed to raise proclamation' }, { status: 500 })
+    }
+
+    return NextResponse.json({ challenge }, { status: 201 })
+  } catch (error) {
+    console.error('Challenges POST error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

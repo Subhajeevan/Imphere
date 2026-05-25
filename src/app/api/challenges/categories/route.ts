@@ -11,8 +11,9 @@ export async function GET() {
 
     const { data: categories, error } = await supabase
       .from('challenge_categories')
-      .select('id, name, slug, icon, description')
-      .order('name')
+      .select('id, name, icon, color, description')
+      .eq('is_active', true)
+      .order('display_order')
 
     if (error) {
       console.error('Categories fetch error:', error)
