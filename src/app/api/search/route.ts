@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 /**
  * GET /api/search
@@ -7,14 +9,41 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const query = searchParams.get('q')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
+
+    if (USE_MOCK_DATA) {
+      if (!query || query.length < 2) {
+        return NextResponse.json({ users: [] })
+      }
+      const currentUserId = USER_IDS.arjun
+      const q = query.toLowerCase()
+
+      const followingIds = mockData.follows
+        .filter(f => f.follower_id === currentUserId)
+        .map(f => f.following_id)
+
+      const users = mockData.profiles
+        .filter(u => u.display_name?.toLowerCase().includes(q) && u.id !== currentUserId)
+        .sort((a, b) => (b.standing || 0) - (a.standing || 0))
+        .slice(0, limit)
+        .map(user => ({
+          id: user.id,
+          displayName: user.display_name,
+          avatarUrl: user.avatar_url,
+          badge: user.badge,
+          standing: user.standing,
+          isFollowing: followingIds.includes(user.id),
+        }))
+
+      return NextResponse.json({ users })
+    }
+
     const supabase = await createClient()
     const {
       data: { user: currentUser },
     } = await supabase.auth.getUser()
-
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q')
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
 
     if (!query || query.length < 2) {
       return NextResponse.json({ users: [] })

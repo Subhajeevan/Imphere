@@ -91,18 +91,18 @@ export function PostCard({
             className={cn(
               'w-10 h-10 rounded-full bg-muted flex items-center justify-center',
               'ring-2',
-              getBadgeColorClass(author.badge)
+              getBadgeColorClass(author?.badge ?? 'Citizen')
             )}
           >
-            {author.avatarUrl ? (
+            {author?.avatarUrl ? (
               <img
                 src={author.avatarUrl}
-                alt={author.displayName}
+                alt={author.displayName ?? 'Unknown User'}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <span className="text-sm font-medium text-muted-foreground">
-                {author.displayName.charAt(0)}
+                {(author?.displayName ?? 'U').charAt(0)}
               </span>
             )}
           </div>
@@ -111,12 +111,12 @@ export function PostCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
             <Link
-              href={`/profile/${author.id}`}
+              href={`/profile/${author?.id}`}
               className="font-medium text-foreground hover:underline truncate"
             >
-              {author.displayName}
+              {author?.displayName ?? 'Unknown User'}
             </Link>
-            {author.isVerified && (
+            {author?.isVerified && (
               <CheckCircle className="w-4 h-4 text-gold fill-gold/20" />
             )}
           </div>
@@ -127,7 +127,7 @@ export function PostCard({
                 <span>·</span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
-                  {location}
+                  {location ?? 'India'}
                 </span>
               </>
             )}
@@ -171,7 +171,7 @@ export function PostCard({
               strokeWidth={vouched ? 2.5 : 2}
             />
             <span className="text-sm font-medium">
-              {formatCompactNumber(localVouchCount)}
+              {formatCompactNumber(localVouchCount ?? 0)}
             </span>
           </button>
 
@@ -181,7 +181,7 @@ export function PostCard({
             className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{formatCompactNumber(commentCount)}</span>
+            <span className="text-sm">{formatCompactNumber(commentCount ?? 0)}</span>
           </Link>
 
           {/* Share Button */}

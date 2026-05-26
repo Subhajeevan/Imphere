@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import CreatePage from './CreatePage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData } from '@/lib/mock-data'
 
 export const metadata = {
   title: 'Create — IMPHERE',
@@ -8,6 +10,15 @@ export const metadata = {
 }
 
 export default async function Page() {
+  if (USE_MOCK_DATA) {
+    return <CreatePage categories={mockData.challengeCategories.map(c => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon,
+      color: c.color
+    }))} />
+  }
+
   const supabase = await createClient()
   const {
     data: { user },

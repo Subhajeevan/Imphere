@@ -168,7 +168,7 @@ export default function ExplorePage() {
                     {user.avatarUrl ? (
                       <img
                         src={user.avatarUrl}
-                        alt={user.displayName}
+                        alt={user.displayName ?? 'Unknown User'}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -180,11 +180,11 @@ export default function ExplorePage() {
                 <div className="flex-1 min-w-0">
                   <Link href={`/profile/${user.id}`}>
                     <p className="font-medium text-foreground truncate hover:text-gold">
-                      {user.displayName}
+                      {user.displayName ?? 'Unknown User'}
                     </p>
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {formatCompactNumber(user.standing)} Standing
+                    {formatCompactNumber(user.standing ?? 0)} Standing
                   </p>
                 </div>
 

@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 /**
  * GET /api/challenges
@@ -15,17 +17,86 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'all'
     const categoriesParam = searchParams.get('categories') || searchParams.get('category')
     const search = searchParams.get('search') || ''
     const cursor = searchParams.get('cursor')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50)
+
+    if (USE_MOCK_DATA) {
+      const currentUserId = USER_IDS.arjun
+      let mockChallenges = mockData.challenges.filter(c => c.status === 'active')
+
+      if (type === 'welfare') {
+        mockChallenges = mockChallenges.filter(c => c.type === 'static')
+      } else if (type === 'proclamation') {
+        mockChallenges = mockChallenges.filter(c => c.type === 'proclamation')
+      }
+
+      const categoryIds = categoriesParam ? categoriesParam.split(',').map(id => id.trim()).filter(Boolean) : []
+      if (categoryIds.length > 0) {
+        mockChallenges = mockChallenges.filter(c => c.category_id && categoryIds.includes(c.category_id))
+      }
+
+      if (search.trim()) {
+        const s = search.trim().toLowerCase()
+        mockChallenges = mockChallenges.filter(c => c.title.toLowerCase().includes(s))
+      }
+
+      mockChallenges.sort((a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime())
+
+      if (cursor) {
+        const cursorIndex = mockChallenges.findIndex(c => c.id === cursor)
+        if (cursorIndex !== -1) {
+          mockChallenges = mockChallenges.slice(cursorIndex + 1)
+        }
+      }
+
+      mockChallenges = mockChallenges.slice(0, limit)
+
+      const transformedChallenges = mockChallenges.map(challenge => {
+        const category = mockData.challengeCategories.find(cat => cat.id === challenge.category_id)
+        const creator = mockData.profiles.find(p => p.id === challenge.created_by)
+        
+        return {
+          id: challenge.id,
+          title: challenge.title,
+          description: challenge.description,
+          type: challenge.type,
+          standingReward: challenge.standing_reward,
+          creditReward: challenge.ic_reward,
+          participantCount: challenge.participant_count,
+          expiresAt: challenge.expires_at,
+          localityName: challenge.locality_name,
+          category: category ? {
+            id: category.id,
+            name: category.name,
+            icon: category.icon,
+          } : null,
+          creator: creator ? {
+            id: creator.id,
+            displayName: creator.display_name,
+            avatarUrl: creator.avatar_url,
+            badge: creator.badge,
+          } : null,
+          isAccepted: mockData.challengeSubmissions.some(sub => sub.challenge_id === challenge.id && sub.user_id === currentUserId),
+          createdAt: challenge.created_at,
+        }
+      })
+
+      const nextCursor = transformedChallenges.length === limit ? transformedChallenges[transformedChallenges.length - 1].id : null
+
+      return NextResponse.json({
+        challenges: transformedChallenges,
+        nextCursor,
+      })
+    }
+
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     // Parse multi-category IDs
     const categoryIds = categoriesParam

@@ -82,7 +82,7 @@ export function ChallengeCard({
             </h3>
           </Link>
           {category && (
-            <span className="text-xs text-muted-foreground">{category.name}</span>
+            <span className="text-xs text-muted-foreground">{category?.name ?? 'Category'}</span>
           )}
         </div>
 
@@ -107,33 +107,33 @@ export function ChallengeCard({
             className={cn(
               'w-8 h-8 rounded-full bg-muted flex items-center justify-center',
               'ring-2',
-              getBadgeColorClass(creator.badge)
+              getBadgeColorClass(creator?.badge ?? 'Citizen')
             )}
           >
-            {creator.avatarUrl ? (
+            {creator?.avatarUrl ? (
               <img
                 src={creator.avatarUrl}
-                alt={creator.displayName}
+                alt={creator.displayName ?? 'User'}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <span className="text-xs font-medium text-muted-foreground">
-                {creator.displayName.charAt(0)}
+                {(creator?.displayName ?? 'U').charAt(0)}
               </span>
             )}
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Raised by</p>
-            <p className="text-sm font-medium">{creator.displayName}</p>
+            <p className="text-sm font-medium">{creator?.displayName ?? 'User'}</p>
           </div>
         </div>
       )}
 
       {/* Participant count for proclamations */}
-      {isProclamation && participantCount > 0 && (
+      {isProclamation && (participantCount ?? 0) > 0 && (
         <div className="mb-4 p-2 bg-muted/30 rounded-lg">
           <span className="text-sm text-muted-foreground">
-            {formatCompactNumber(participantCount)} backers
+            {formatCompactNumber(participantCount ?? 0)} backers
           </span>
         </div>
       )}
@@ -146,10 +146,10 @@ export function ChallengeCard({
             {timeRemaining}
           </span>
         )}
-        {!isProclamation && participantCount > 0 && (
+        {!isProclamation && (participantCount ?? 0) > 0 && (
           <span className="flex items-center gap-1">
             <Users className="w-3.5 h-3.5" />
-            {formatCompactNumber(participantCount)} completed
+            {formatCompactNumber(participantCount ?? 0)} completed
           </span>
         )}
         {localityName && (
@@ -164,12 +164,12 @@ export function ChallengeCard({
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-1 text-sm">
           <Trophy className="w-4 h-4 text-gold" />
-          <span className="font-medium">+{standingReward}</span>
+          <span className="font-medium">+{standingReward ?? 0}</span>
           <span className="text-muted-foreground">Standing</span>
         </div>
         <div className="flex items-center gap-1 text-sm">
           <Coins className="w-4 h-4 text-gold" />
-          <span className="font-medium">+{creditReward}</span>
+          <span className="font-medium">+{creditReward ?? 0}</span>
           <span className="text-muted-foreground">IC</span>
         </div>
       </div>

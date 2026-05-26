@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 /**
  * GET /api/users/[id]/challenges
@@ -11,11 +13,46 @@ export async function GET(
 ) {
   try {
     const { id: userId } = await params
-    const supabase = await createClient()
-
     const { searchParams } = new URL(request.url)
     const cursor = searchParams.get('cursor')
     const limit = Math.min(parseInt(searchParams.get('limit') || '30'), 50)
+
+    if (USE_MOCK_DATA) {
+      let mockSubmissions = mockData.challengeSubmissions.filter(s => s.user_id === userId && s.status === 'verified')
+      mockSubmissions.sort((a, b) => new Date(b.verified_at ?? '').getTime() - new Date(a.verified_at ?? '').getTime())
+
+      if (cursor) {
+        const cursorIndex = mockSubmissions.findIndex(s => s.id === cursor)
+        if (cursorIndex !== -1) {
+          mockSubmissions = mockSubmissions.slice(cursorIndex + 1)
+        }
+      }
+
+      mockSubmissions = mockSubmissions.slice(0, limit)
+
+      const transformedChallenges = mockSubmissions.map(submission => {
+        const challenge = mockData.challenges.find(c => c.id === submission.challenge_id)
+        
+        return {
+          id: submission.id,
+          challengeId: submission.challenge_id,
+          title: challenge?.title,
+          mediaUrl: submission.media_url,
+          standingReward: challenge?.standing_reward,
+          creditReward: challenge?.ic_reward,
+          verifiedAt: submission.verified_at,
+        }
+      })
+
+      const nextCursor = transformedChallenges.length === limit ? transformedChallenges[transformedChallenges.length - 1].id : null
+
+      return NextResponse.json({
+        challenges: transformedChallenges,
+        nextCursor,
+      })
+    }
+
+    const supabase = await createClient()
 
     let query = supabase
       .from('challenge_submissions')

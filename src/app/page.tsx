@@ -1,8 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { HomePage } from './HomePage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    return (
+      <HomePage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url,
+                standing: profile.standing,
+                badge: profile.badge,
+              }
+            : undefined
+        }
+      />
+    )
+  }
+
   const supabase = await createClient()
   const {
     data: { user },

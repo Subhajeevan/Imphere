@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ProfilePage } from './ProfilePage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -8,6 +10,52 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
   const { id } = await params
+
+  if (USE_MOCK_DATA) {
+    const currentUserId = USER_IDS.arjun
+    const profile = mockData.profiles.find(p => p.id === id) || mockData.profiles[0]
+    const currentUserProfile = mockData.profiles.find(p => p.id === currentUserId)
+
+    const isFollowing = mockData.follows.some(f => f.follower_id === currentUserId && f.following_id === profile.id)
+    
+    const postCount = mockData.posts.filter(p => p.author_id === profile.id && p.moderation_status === 'approved').length
+    const challengeCount = mockData.challengeSubmissions.filter(s => s.user_id === profile.id && s.status === 'verified').length
+    const followerCount = mockData.follows.filter(f => f.following_id === profile.id).length
+    const followingCount = mockData.follows.filter(f => f.follower_id === profile.id).length
+
+    return (
+      <ProfilePage
+        profile={{
+          id: profile.id,
+          displayName: profile.display_name,
+          avatarUrl: profile.avatar_url,
+          bio: profile.bio,
+          standing: profile.standing,
+          impactCredits: profile.impact_credits,
+          badge: profile.badge,
+          nativePin: profile.native_pin_name,
+          believers: followerCount,
+          believing: followingCount,
+          postCount,
+          challengeCount,
+          isFollowing,
+          isOwnProfile: currentUserId === profile.id,
+          createdAt: profile.created_at,
+        }}
+        currentUser={
+          currentUserProfile
+            ? {
+                displayName: currentUserProfile.display_name,
+                avatarUrl: currentUserProfile.avatar_url,
+                standing: currentUserProfile.standing,
+                badge: currentUserProfile.badge,
+              }
+            : undefined
+        }
+      />
+    )
+  }
+
   const supabase = await createClient()
   const {
     data: { user: currentUser },

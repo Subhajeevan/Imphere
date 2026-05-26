@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 /**
  * GET /api/explore/suggested
@@ -7,6 +9,29 @@ import { NextResponse } from 'next/server'
  */
 export async function GET() {
   try {
+    if (USE_MOCK_DATA) {
+      const currentUserId = USER_IDS.arjun
+      
+      const followingIds = mockData.follows
+        .filter(f => f.follower_id === currentUserId)
+        .map(f => f.following_id)
+
+      const transformedUsers = mockData.profiles
+        .filter(u => u.id !== currentUserId && !followingIds.includes(u.id) && u.onboarding_status === 'active')
+        .sort((a, b) => (b.standing || 0) - (a.standing || 0))
+        .slice(0, 10)
+        .map(user => ({
+          id: user.id,
+          displayName: user.display_name,
+          avatarUrl: user.avatar_url,
+          badge: user.badge,
+          standing: user.standing,
+          isFollowing: false,
+        }))
+
+      return NextResponse.json({ users: transformedUsers })
+    }
+
     const supabase = await createClient()
     const {
       data: { user: currentUser },

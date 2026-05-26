@@ -1,8 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { NotificationsPage } from './NotificationsPage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    // mockData doesn't have notifications for arjun, let's just use all mock notifications for demo
+    const notifications = mockData.notifications.map(n => ({
+      id: n.id,
+      type: n.type,
+      title: n.title,
+      body: n.message, // Map message to body
+      data: null,
+      is_read: n.is_read,
+      created_at: n.created_at,
+    }))
+    return (
+      <NotificationsPage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url,
+                standing: profile.standing,
+                badge: profile.badge,
+              }
+            : undefined
+        }
+        notifications={notifications}
+      />
+    )
+  }
+
   const supabase = await createClient()
   const {
     data: { user },

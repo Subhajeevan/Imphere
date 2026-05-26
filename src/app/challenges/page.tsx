@@ -1,8 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ChallengesPage } from './ChallengesPage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    return (
+      <ChallengesPage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url,
+                standing: profile.standing,
+                badge: profile.badge,
+              }
+            : undefined
+        }
+        categories={mockData.challengeCategories.map(c => ({
+          id: c.id,
+          name: c.name,
+          icon: c.icon,
+          color: c.color
+        }))}
+      />
+    )
+  }
+
   const supabase = await createClient()
   const {
     data: { user },

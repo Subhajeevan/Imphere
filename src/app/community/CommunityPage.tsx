@@ -119,7 +119,7 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
                   {circle.avatar_url ? (
                     <img
                       src={circle.avatar_url}
-                      alt={circle.name}
+                      alt={circle.name ?? 'Unknown Circle'}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
@@ -128,16 +128,16 @@ export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) 
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-foreground truncate">
-                    {circle.name}
+                    {circle.name ?? 'Unknown Circle'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {circle.member_count} members
+                    {circle.member_count ?? 0} members
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gold flex items-center gap-1">
                     <Star className="w-4 h-4" />
-                    {formatCompactNumber(circle.eminence_score)}
+                    {formatCompactNumber(circle.eminence_score ?? 0)}
                   </p>
                   <p className="text-xs text-muted-foreground">Eminence</p>
                 </div>
