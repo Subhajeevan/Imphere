@@ -159,7 +159,8 @@ export async function GET(request: NextRequest) {
     }
 
 
-    const { data: challenges, error } = await query
+    const { data, error } = await query
+    const challenges = data as any[] | null
 
     if (error) {
       console.error('Challenges fetch error:', error)
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest) {
         .eq('user_id', user.id)
         .in('challenge_id', challengeIds)
 
-      acceptedChallengeIds = submissions?.map((s) => s.challenge_id) || []
+      acceptedChallengeIds = (submissions as any[])?.map((s) => s.challenge_id) || []
     }
 
     // Transform challenges for response
@@ -279,7 +280,7 @@ export async function POST(request: NextRequest) {
         status: 'active',
         standing_reward: 100,
         ic_reward: 50,
-      })
+      } as any)
       .select('id')
       .single()
 

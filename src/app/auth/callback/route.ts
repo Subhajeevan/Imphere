@@ -23,11 +23,13 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser()
 
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('onboarding_status')
           .eq('id', user.id)
           .single()
+
+        const profile = profileData as any
 
         // Redirect to onboarding if not completed
         if (profile?.onboarding_status === 'incomplete') {

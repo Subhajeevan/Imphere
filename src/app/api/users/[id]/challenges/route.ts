@@ -79,7 +79,8 @@ export async function GET(
       query = query.lt('id', cursor)
     }
 
-    const { data: submissions, error } = await query
+    const { data, error } = await query
+    const submissions = data as any[] | null
 
     if (error) {
       console.error('Challenges fetch error:', error)

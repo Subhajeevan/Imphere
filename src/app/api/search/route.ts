@@ -50,12 +50,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Search users by display name
-    const { data: users, error } = await supabase
+    const { data: rawUsers, error } = await supabase
       .from('profiles')
       .select('id, display_name, avatar_url, badge, standing')
       .ilike('display_name', `%${query}%`)
       .order('standing', { ascending: false })
       .limit(limit)
+
+    const users = rawUsers as any[] | null
 
     if (error) {
       console.error('Search error:', error)
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
         .eq('follower_id', currentUser.id)
         .in('following_id', userIds)
 
-      followingIds = follows?.map((f) => f.following_id) || []
+      followingIds = (follows as any[])?.map((f) => f.following_id) || []
     }
 
     const transformedUsers = users

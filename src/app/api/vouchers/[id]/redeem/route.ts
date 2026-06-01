@@ -1,6 +1,5 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { generateRandomString } from '@/lib/utils'
 
 /**
  * POST /api/vouchers/[id]/redeem
@@ -13,7 +12,7 @@ export async function POST(
   try {
     const { id: voucherId } = await params
     const supabase = await createClient()
-    const adminClient = createAdminClient()
+    const adminClient = await createAdminClient()
 
     const {
       data: { user },
@@ -24,11 +23,13 @@ export async function POST(
     }
 
     // Get user's current IC balance
-    const { data: profile, error: profileError } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('impact_credits')
       .eq('id', user.id)
       .single()
+
+    const profile = profileData as any
 
     if (profileError || !profile) {
       return NextResponse.json(
@@ -38,26 +39,21 @@ export async function POST(
     }
 
     // Get voucher details
-    const { data: voucher, error: voucherError } = await supabase
+    const { data: voucherData, error: voucherError } = await supabase
       .from('vouchers')
-      .select('id, title, ic_cost, stock, is_active')
+      .select('id, title, ic_cost, is_active, is_redeemed, encrypted_code')
       .eq('id', voucherId)
       .single()
+
+    const voucher = voucherData as any
 
     if (voucherError || !voucher) {
       return NextResponse.json({ error: 'Voucher not found' }, { status: 404 })
     }
 
-    if (!voucher.is_active) {
+    if (!voucher.is_active || voucher.is_redeemed) {
       return NextResponse.json(
         { error: 'Voucher is no longer available' },
-        { status: 400 }
-      )
-    }
-
-    if (voucher.stock <= 0) {
-      return NextResponse.json(
-        { error: 'Voucher is out of stock' },
         { status: 400 }
       )
     }
@@ -69,13 +65,10 @@ export async function POST(
       )
     }
 
-    // Generate redemption code
-    const redemptionCode = generateRandomString(8).toUpperCase()
-
     // Use admin client for atomic transaction
     // 1. Deduct IC from user
-    const { error: deductError } = await adminClient
-      .from('profiles')
+    const { error: deductError } = await (adminClient
+      .from('profiles') as any)
       .update({
         impact_credits: profile.impact_credits - voucher.ic_cost,
       })
@@ -89,44 +82,45 @@ export async function POST(
       )
     }
 
-    // 2. Decrement voucher stock
-    const { error: stockError } = await adminClient
-      .from('vouchers')
-      .update({ stock: voucher.stock - 1 })
+    // 2. Mark voucher as redeemed
+    const { error: redeemError } = await (adminClient
+      .from('vouchers') as any)
+      .update({
+        is_redeemed: true,
+        redeemed_by: user.id,
+        redeemed_at: new Date().toISOString()
+      })
       .eq('id', voucherId)
 
-    if (stockError) {
+    if (redeemError) {
       // Rollback IC deduction
-      await adminClient
-        .from('profiles')
+      await (adminClient
+        .from('profiles') as any)
         .update({ impact_credits: profile.impact_credits })
         .eq('id', user.id)
 
-      console.error('Failed to update stock:', stockError)
+      console.error('Failed to update voucher:', redeemError)
       return NextResponse.json(
         { error: 'Failed to process redemption' },
         { status: 500 }
       )
     }
 
-    // 3. Create redemption record
-    const { error: redemptionError } = await adminClient
-      .from('voucher_redemptions')
+    // 3. Log transaction
+    await (adminClient
+      .from('transactions') as any)
       .insert({
-        voucher_id: voucherId,
         user_id: user.id,
-        code: redemptionCode,
-        ic_spent: voucher.ic_cost,
+        type: 'voucher_redeemed',
+        amount: voucher.ic_cost,
+        balance_after: profile.impact_credits - voucher.ic_cost,
+        description: `Redeemed voucher: ${voucher.title}`,
+        related_voucher_id: voucherId
       })
-
-    if (redemptionError) {
-      console.error('Failed to create redemption record:', redemptionError)
-      // Don't rollback as the user has successfully redeemed
-    }
 
     return NextResponse.json({
       success: true,
-      code: redemptionCode,
+      code: voucher.encrypted_code, // Return the voucher code
     })
   } catch (error) {
     console.error('Voucher redeem error:', error)

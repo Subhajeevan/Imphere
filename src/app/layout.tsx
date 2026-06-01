@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const inter = Inter({
@@ -68,30 +69,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <head>
-        <script
+      <body className="min-h-screen bg-background font-sans antialiased transition-colors duration-300">
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  const html = document.documentElement;
-                  const theme = localStorage.getItem('hs_theme') || 'auto';
-                  const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                  
-                  if (isDark) {
-                    html.classList.add('dark');
-                    html.classList.remove('light');
-                  } else {
-                    html.classList.remove('dark');
-                    html.classList.add('light');
-                  }
-                } catch (e) {}
-              })();
+              try {
+                const html = document.documentElement;
+                const theme = localStorage.getItem('hs_theme') || 'auto';
+                const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                
+                if (isDark) {
+                  html.classList.add('dark');
+                  html.classList.remove('light');
+                } else {
+                  html.classList.remove('dark');
+                  html.classList.add('light');
+                }
+              } catch (e) {}
             `,
           }}
         />
-      </head>
-      <body className="min-h-screen bg-background font-sans antialiased transition-colors duration-300">
         {children}
       </body>
     </html>

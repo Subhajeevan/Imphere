@@ -61,13 +61,14 @@ export default function OnboardingPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('display_name')
           .eq('id', user.id)
           .single()
+        const profile = profileData as any
         if (profile) {
-          setUser(profile)
+          setUser({ display_name: profile.display_name || '' })
         }
       }
     }

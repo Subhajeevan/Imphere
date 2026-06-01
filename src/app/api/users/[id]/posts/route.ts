@@ -90,7 +90,8 @@ export async function GET(
       query = query.lt('id', cursor)
     }
 
-    const { data: posts, error } = await query
+    const { data, error } = await query
+    const posts = data as any[] | null
 
     if (error) {
       console.error('Posts fetch error:', error)
@@ -120,8 +121,8 @@ export async function GET(
           .in('post_id', postIds),
       ])
 
-      vouchedPostIds = vouchResult.data?.map((v) => v.post_id) || []
-      savedPostIds = saveResult.data?.map((s) => s.post_id) || []
+      vouchedPostIds = (vouchResult.data as any[])?.map((v) => v.post_id) || []
+      savedPostIds = (saveResult.data as any[])?.map((s) => s.post_id) || []
     }
 
     const transformedPosts = posts?.map((post) => ({

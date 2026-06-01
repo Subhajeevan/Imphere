@@ -21,11 +21,13 @@ export async function POST(
     }
 
     // Check if challenge exists and is active
-    const { data: challenge, error: challengeError } = await supabase
+    const { data, error: challengeError } = await supabase
       .from('challenges')
-      .select('id, status, max_participants, current_participants')
+      .select('id, status')
       .eq('id', challengeId)
       .single()
+
+    const challenge = data as { id: string; status: string } | null
 
     if (challengeError || !challenge) {
       return NextResponse.json(
@@ -37,17 +39,6 @@ export async function POST(
     if (challenge.status !== 'active') {
       return NextResponse.json(
         { error: 'Challenge is not active' },
-        { status: 400 }
-      )
-    }
-
-    // Check if already at max participants
-    if (
-      challenge.max_participants &&
-      challenge.current_participants >= challenge.max_participants
-    ) {
-      return NextResponse.json(
-        { error: 'Challenge has reached maximum participants' },
         { status: 400 }
       )
     }
@@ -74,7 +65,9 @@ export async function POST(
         challenge_id: challengeId,
         user_id: user.id,
         status: 'pending',
-      })
+        media_url: '',
+        claimed_location: 'POINT(0 0)'
+      } as any)
 
     if (insertError) {
       console.error('Failed to accept challenge:', insertError)

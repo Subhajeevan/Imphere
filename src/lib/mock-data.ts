@@ -42,6 +42,9 @@ const CHALLENGE_IDS = {
   c3: 'c1000000-0000-0000-0000-000000000003',
   c4: 'c1000000-0000-0000-0000-000000000004',
   c5: 'c1000000-0000-0000-0000-000000000005',
+  c6: 'c1000000-0000-0000-0000-000000000006',
+  c7: 'c1000000-0000-0000-0000-000000000007',
+  c8: 'c1000000-0000-0000-0000-000000000008',
 } as const
 
 const POST_IDS = {
@@ -359,7 +362,7 @@ const mockChallengeCategories: Tables<'challenge_categories'>[] = [
 ]
 
 // ============================================================================
-// PART 6 — CHALLENGES (5)
+// PART 6 — CHALLENGES (8)
 // ============================================================================
 
 const mockChallenges: Tables<'challenges'>[] = [
@@ -461,6 +464,66 @@ const mockChallenges: Tables<'challenges'>[] = [
     completion_count: 19,
     expires_at: daysFromNow(30),
     created_at: daysAgo(20),
+    updated_at: daysAgo(1),
+  },
+  {
+    id: CHALLENGE_IDS.c6,
+    title: 'Segregate Waste for 7 Days',
+    description: 'Separate dry and wet waste at home for 7 consecutive days. Document each day with a photo showing two separate bins. Build the habit that makes a city cleaner.',
+    type: 'static',
+    status: 'active',
+    category_id: CATEGORY_IDS.environment,
+    created_by: USER_IDS.arjun,
+    location: LOCATIONS.mumbai,
+    locality_name: 'Mumbai',
+    standing_reward: 180,
+    ic_reward: 40,
+    power_threshold: 700,
+    current_power: 420,
+    participant_count: 28,
+    completion_count: 9,
+    expires_at: daysFromNow(75),
+    created_at: daysAgo(40),
+    updated_at: daysAgo(1),
+  },
+  {
+    id: CHALLENGE_IDS.c7,
+    title: 'Fix a Pothole \u2014 Report and Follow Up',
+    description: 'Identify a pothole in your area, report it to the municipal corporation via their official app or helpline, document the complaint number, and follow up after 7 days with a second photo.',
+    type: 'static',
+    status: 'active',
+    category_id: CATEGORY_IDS.community,
+    created_by: USER_IDS.arjun,
+    location: LOCATIONS.pune,
+    locality_name: 'Pune',
+    standing_reward: 220,
+    ic_reward: 55,
+    power_threshold: 500,
+    current_power: 310,
+    participant_count: 19,
+    completion_count: 6,
+    expires_at: daysFromNow(50),
+    created_at: daysAgo(25),
+    updated_at: daysAgo(2),
+  },
+  {
+    id: CHALLENGE_IDS.c8,
+    title: 'Run a Free Skill Workshop',
+    description: 'Organise and conduct a free skill-sharing session for at least 5 people in your community. Skills can include coding, cooking, stitching, spoken English, or any practical skill. Document with group photo and attendance sheet.',
+    type: 'static',
+    status: 'active',
+    category_id: CATEGORY_IDS.education,
+    created_by: USER_IDS.arjun,
+    location: LOCATIONS.bangalore,
+    locality_name: 'Bangalore',
+    standing_reward: 260,
+    ic_reward: 65,
+    power_threshold: 600,
+    current_power: 280,
+    participant_count: 14,
+    completion_count: 4,
+    expires_at: daysFromNow(60),
+    created_at: daysAgo(15),
     updated_at: daysAgo(1),
   },
 ]

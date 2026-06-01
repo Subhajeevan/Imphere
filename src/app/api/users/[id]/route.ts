@@ -56,7 +56,7 @@ export async function GET(
     } = await supabase.auth.getUser()
 
     // Fetch profile
-    const { data: profile, error } = await supabase
+    const { data: rawProfile, error } = await supabase
       .from('profiles')
       .select(
         `
@@ -73,6 +73,8 @@ export async function GET(
       )
       .eq('id', userId)
       .single()
+
+    const profile = rawProfile as any
 
     if (error || !profile) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })

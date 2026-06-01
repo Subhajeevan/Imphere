@@ -27,13 +27,13 @@ export default async function Page({ params }: PageProps) {
       <ProfilePage
         profile={{
           id: profile.id,
-          displayName: profile.display_name,
-          avatarUrl: profile.avatar_url,
-          bio: profile.bio,
-          standing: profile.standing,
-          impactCredits: profile.impact_credits,
-          badge: profile.badge,
-          nativePin: profile.native_pin_name,
+          displayName: profile.display_name || '',
+          avatarUrl: profile.avatar_url || undefined,
+          bio: profile.bio || undefined,
+          standing: profile.standing || 0,
+          impactCredits: profile.impact_credits || 0,
+          badge: profile.badge || 'Citizen',
+          nativePin: profile.native_pin_name || undefined,
           believers: followerCount,
           believing: followingCount,
           postCount,
@@ -45,10 +45,10 @@ export default async function Page({ params }: PageProps) {
         currentUser={
           currentUserProfile
             ? {
-                displayName: currentUserProfile.display_name,
-                avatarUrl: currentUserProfile.avatar_url,
-                standing: currentUserProfile.standing,
-                badge: currentUserProfile.badge,
+                displayName: currentUserProfile.display_name || '',
+                avatarUrl: currentUserProfile.avatar_url || undefined,
+                standing: currentUserProfile.standing || 0,
+                badge: currentUserProfile.badge || 'Citizen',
               }
             : undefined
         }
@@ -62,7 +62,7 @@ export default async function Page({ params }: PageProps) {
   } = await supabase.auth.getUser()
 
   // Fetch the profile
-  const { data: profile, error } = await supabase
+  const { data: profileData, error } = await supabase
     .from('profiles')
     .select(
       `
@@ -80,9 +80,11 @@ export default async function Page({ params }: PageProps) {
     .eq('id', id)
     .single()
 
-  if (error || !profile) {
+  if (error || !profileData) {
     notFound()
   }
+
+  const profile = profileData as any
 
   // Check if following
   let isFollowing = false
@@ -121,25 +123,25 @@ export default async function Page({ params }: PageProps) {
   // Current user profile for sidebar
   let currentUserProfile = null
   if (currentUser) {
-    const { data } = await supabase
+    const { data: currentUserProfileData } = await supabase
       .from('profiles')
       .select('display_name, avatar_url, standing, badge')
       .eq('id', currentUser.id)
       .single()
-    currentUserProfile = data
+    currentUserProfile = currentUserProfileData as any
   }
 
   return (
     <ProfilePage
       profile={{
         id: profile.id,
-        displayName: profile.display_name,
-        avatarUrl: profile.avatar_url,
-        bio: profile.bio,
-        standing: profile.standing,
-        impactCredits: profile.impact_credits,
-        badge: profile.badge,
-        nativePin: profile.native_pin_name,
+        displayName: profile.display_name || '',
+        avatarUrl: profile.avatar_url || undefined,
+        bio: profile.bio || undefined,
+        standing: profile.standing || 0,
+        impactCredits: profile.impact_credits || 0,
+        badge: profile.badge || 'Citizen',
+        nativePin: profile.native_pin_name || undefined,
         believers: followerResult.count || 0,
         believing: followingResult.count || 0,
         postCount: postResult.count || 0,
@@ -151,10 +153,10 @@ export default async function Page({ params }: PageProps) {
       currentUser={
         currentUserProfile
           ? {
-              displayName: currentUserProfile.display_name,
-              avatarUrl: currentUserProfile.avatar_url,
-              standing: currentUserProfile.standing,
-              badge: currentUserProfile.badge,
+              displayName: currentUserProfile.display_name || '',
+              avatarUrl: currentUserProfile.avatar_url || undefined,
+              standing: currentUserProfile.standing || 0,
+              badge: currentUserProfile.badge || 'Citizen',
             }
           : undefined
       }

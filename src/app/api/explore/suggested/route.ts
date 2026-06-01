@@ -38,12 +38,14 @@ export async function GET() {
     } = await supabase.auth.getUser()
 
     // Get top users by standing
-    const { data: users, error } = await supabase
+    const { data: rawUsers, error } = await supabase
       .from('profiles')
       .select('id, display_name, avatar_url, badge, standing')
       .eq('onboarding_status', 'active')
       .order('standing', { ascending: false })
       .limit(20)
+
+    const users = rawUsers as any[] | null
 
     if (error) {
       console.error('Suggested users error:', error)
@@ -63,7 +65,7 @@ export async function GET() {
         .eq('follower_id', currentUser.id)
         .in('following_id', userIds)
 
-      followingIds = follows?.map((f) => f.following_id) || []
+      followingIds = (follows as any[])?.map((f) => f.following_id) || []
     }
 
     // Filter out current user and already following

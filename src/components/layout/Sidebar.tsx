@@ -59,7 +59,7 @@ export function Sidebar({ user }: SidebarProps) {
       </div>
 
       {/* Primary Navigation */}
-      <nav className="flex-1 px-3">
+      <nav className="flex-1 px-3 overflow-y-auto">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href

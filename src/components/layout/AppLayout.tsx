@@ -17,7 +17,7 @@ interface AppLayoutProps {
 export function AppLayout({ children, user, notificationCount }: AppLayoutProps) {
   return (
     /* overflow-x-hidden on root prevents any child from causing horizontal scroll */
-    <div className="min-h-screen w-full overflow-x-hidden bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-300">
       {/* Mobile Navigation */}
       <MobileTopBar notificationCount={notificationCount} />
 

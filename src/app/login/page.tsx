@@ -51,11 +51,13 @@ function LoginForm() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('onboarding_status')
           .eq('id', user.id)
           .single()
+
+        const profile = profileData as any
 
         router.push(profile?.onboarding_status === 'incomplete' ? '/onboarding' : '/')
         router.refresh()

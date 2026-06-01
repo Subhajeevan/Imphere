@@ -12,10 +12,10 @@ export default async function Page() {
         user={
           profile
             ? {
-                displayName: profile.display_name,
-                avatarUrl: profile.avatar_url,
-                standing: profile.standing,
-                badge: profile.badge,
+                displayName: profile.display_name || '',
+                avatarUrl: profile.avatar_url ?? undefined,
+                standing: profile.standing ?? 0,
+                badge: profile.badge ?? 'Citizen',
               }
             : undefined
         }
@@ -39,11 +39,13 @@ export default async function Page() {
   }
 
   // Fetch user profile
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('display_name, avatar_url, standing, badge')
     .eq('id', user.id)
     .single()
+
+  const profile = profileData as any
 
   // Fetch challenge categories (no 'slug' column in schema)
   const { data: categories } = await supabase
@@ -57,10 +59,10 @@ export default async function Page() {
       user={
         profile
           ? {
-              displayName: profile.display_name,
-              avatarUrl: profile.avatar_url,
-              standing: profile.standing,
-              badge: profile.badge,
+              displayName: profile.display_name || '',
+              avatarUrl: profile.avatar_url ?? undefined,
+              standing: profile.standing ?? 0,
+              badge: profile.badge ?? 'Citizen',
             }
           : undefined
       }

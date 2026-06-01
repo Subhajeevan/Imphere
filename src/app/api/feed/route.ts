@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         .select('following_id')
         .eq('follower_id', user.id)
 
-      const followingIds = following?.map((f) => f.following_id) || []
+      const followingIds = (following as any[])?.map((f) => f.following_id) || []
 
       if (followingIds.length > 0) {
         query = query.in('author_id', followingIds)
@@ -138,7 +138,8 @@ export async function GET(request: NextRequest) {
       query = query.lt('id', cursor)
     }
 
-    const { data: posts, error } = await query
+    const { data, error } = await query
+    const posts = data as any[] | null
 
     if (error) {
       console.error('Feed fetch error:', error)
@@ -168,8 +169,8 @@ export async function GET(request: NextRequest) {
           .in('post_id', postIds),
       ])
 
-      vouchedPostIds = vouchResult.data?.map((v) => v.post_id) || []
-      savedPostIds = saveResult.data?.map((s) => s.post_id) || []
+      vouchedPostIds = (vouchResult.data as any[])?.map((v) => v.post_id) || []
+      savedPostIds = (saveResult.data as any[])?.map((s) => s.post_id) || []
     }
 
     // Transform posts for response

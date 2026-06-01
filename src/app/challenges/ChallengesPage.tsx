@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { Plus, AlertCircle, Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
-type ChallengeTab = 'welfare' | 'proclamation'
+type ChallengeTab = 'all' | 'welfare' | 'proclamation'
 
 interface Category {
   id: string
@@ -50,7 +50,7 @@ interface ChallengesPageProps {
 }
 
 export function ChallengesPage({ user, categories }: ChallengesPageProps) {
-  const [activeTab, setActiveTab] = useState<ChallengeTab>('welfare')
+  const [activeTab, setActiveTab] = useState<ChallengeTab>('all')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -204,7 +204,7 @@ export function ChallengesPage({ user, categories }: ChallengesPageProps) {
 
         {/* Welfare / Proclamation tab switcher */}
         <div className="flex border-b border-border">
-          {(['welfare', 'proclamation'] as ChallengeTab[]).map((tab) => (
+          {(['all', 'welfare', 'proclamation'] as ChallengeTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -218,7 +218,7 @@ export function ChallengesPage({ user, categories }: ChallengesPageProps) {
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {tab === 'welfare' ? 'Welfare Tracks' : 'Proclamations'}
+              {tab === 'all' ? 'All' : tab === 'welfare' ? 'Welfare Tracks' : 'Proclamations'}
               {activeTab === tab && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
               )}
@@ -227,7 +227,7 @@ export function ChallengesPage({ user, categories }: ChallengesPageProps) {
         </div>
 
         {/* ── YouTube-style Category Ribbon ───────────────────────── */}
-        {activeTab === 'welfare' && categories.length > 0 && (
+        {(activeTab === 'welfare' || activeTab === 'all') && categories.length > 0 && (
           <div className="relative">
             {/* Left fade + scroll button — desktop only */}
             {canScrollLeft && (
@@ -386,7 +386,7 @@ export function ChallengesPage({ user, categories }: ChallengesPageProps) {
             <p className="text-sm text-muted-foreground mb-4">
               {hasActiveFilters
                 ? 'Try adjusting your search or category filters'
-                : `No ${activeTab === 'welfare' ? 'challenges' : 'proclamations'} available right now`}
+                : `No ${activeTab === 'welfare' ? 'welfare tracks' : activeTab === 'all' ? 'challenges' : 'proclamations'} available right now`}
             </p>
             {hasActiveFilters && (
               <button

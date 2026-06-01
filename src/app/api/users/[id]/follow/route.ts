@@ -43,7 +43,7 @@ export async function POST(
     }
 
     // Create follow relationship
-    const { error } = await supabase.from('follows').insert({
+    const { error } = await (supabase.from('follows') as any).insert({
       follower_id: user.id,
       following_id: targetUserId,
     })
@@ -85,8 +85,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { error } = await supabase
-      .from('follows')
+    const { error } = await (supabase
+      .from('follows') as any)
       .delete()
       .eq('follower_id', user.id)
       .eq('following_id', targetUserId)

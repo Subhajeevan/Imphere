@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         locality_name: localityName?.trim() || null,
         is_approved: true,
         moderation_status: 'approved',
-      })
+      } as any)
       .select('id')
       .single()
 

@@ -29,10 +29,10 @@ export default async function Page() {
         user={
           profile
             ? {
-                displayName: profile.display_name,
-                avatarUrl: profile.avatar_url,
-                standing: profile.standing,
-                badge: profile.badge,
+                displayName: profile.display_name || '',
+                avatarUrl: profile.avatar_url || undefined,
+                standing: profile.standing || 0,
+                badge: profile.badge || 'Citizen',
               }
             : undefined
         }
@@ -52,14 +52,16 @@ export default async function Page() {
   }
 
   // Fetch user profile
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('display_name, avatar_url, standing, badge')
     .eq('id', user.id)
     .single()
 
+  const profile = profileData as any
+
   // Fetch user's circles
-  const { data: circles } = await supabase
+  const { data: circlesData } = await supabase
     .from('impact_circle_members')
     .select(
       `
@@ -76,20 +78,22 @@ export default async function Page() {
     )
     .eq('user_id', user.id)
 
+  const circles = circlesData as any
+
   return (
     <CommunityPage
       user={
         profile
           ? {
-              displayName: profile.display_name,
-              avatarUrl: profile.avatar_url,
-              standing: profile.standing,
-              badge: profile.badge,
+              displayName: profile.display_name || '',
+              avatarUrl: profile.avatar_url || undefined,
+              standing: profile.standing || 0,
+              badge: profile.badge || 'Citizen',
             }
           : undefined
       }
       userBadge={profile?.badge || 'Citizen'}
-      circles={circles?.map((c) => c.circle).filter(Boolean) || []}
+      circles={(circles?.map((c: any) => c.circle).filter(Boolean) || []) as any[]}
     />
   )
 }

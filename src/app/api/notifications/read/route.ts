@@ -23,9 +23,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true, read_at: new Date().toISOString() })
+    const { error } = await (supabase
+      .from('notifications') as any)
+      .update({ is_read: true })
       .eq('user_id', user.id)
       .in('id', ids)
 
