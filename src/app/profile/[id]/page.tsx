@@ -12,7 +12,20 @@ export default async function Page({ params }: PageProps) {
   const { id } = await params
 
   if (USE_MOCK_DATA) {
-    const currentUserId = USER_IDS.arjun
+    const {
+      data: { user },
+    } = await createClient().auth.getUser()
+
+    let currentUserId = USER_IDS.arjun
+    if (user) {
+      const profileById = mockData.profiles.find(p => p.id === user.id)
+      const profileByEmail = user.email
+        ? mockData.profiles.find(p => p.email === user.email)
+        : undefined
+
+      currentUserId = profileById?.id ?? profileByEmail?.id ?? USER_IDS.arjun
+    }
+
     const profile = mockData.profiles.find(p => p.id === id) || mockData.profiles[0]
     const currentUserProfile = mockData.profiles.find(p => p.id === currentUserId)
 
