@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Clock, MapPin, Users, Trophy, Coins, CheckCircle } from 'lucide-react'
+import { Camera, Clock, MapPin, Users, Trophy, Coins, CheckCircle } from 'lucide-react'
 import { cn, formatCompactNumber, getBadgeColorClass } from '@/lib/utils'
 
 interface ChallengeCardProps {
@@ -88,7 +88,9 @@ export function ChallengeCard({
 
         {/* Status Badge */}
         {isAccepted && (
-          <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+          <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400
+                          bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800
+                          px-2 py-1 rounded-full flex-shrink-0">
             <CheckCircle className="w-3 h-3" />
             Accepted
           </span>
@@ -186,10 +188,12 @@ export function ChallengeCard({
       ) : (
         <Link
           href={`/challenges/${id}/submit`}
-          className="block w-full py-2.5 text-center bg-gold/10 text-gold font-medium rounded-lg
-                     hover:bg-gold/20 transition-colors"
+          className="flex items-center justify-center gap-2 w-full py-2.5
+                     bg-gradient-to-r from-gold to-gold-dark text-white font-medium rounded-lg
+                     hover:opacity-90 transition-opacity shadow-sm shadow-gold/20"
         >
-          Submit Proof
+          <Camera className="w-4 h-4" />
+          Submit Proof & Claim Rewards
         </Link>
       )}
     </article>

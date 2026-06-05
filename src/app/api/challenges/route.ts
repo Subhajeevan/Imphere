@@ -94,6 +94,8 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -103,7 +105,7 @@ export async function GET(request: NextRequest) {
       ? categoriesParam.split(',').map((id) => id.trim()).filter(Boolean)
       : []
 
-    let query = supabase
+    let query = db
       .from('challenges')
       .select(
         `
@@ -172,18 +174,24 @@ export async function GET(request: NextRequest) {
     // Get user's accepted challenges
     let acceptedChallengeIds: string[] = []
     if (user && challenges && challenges.length > 0) {
-      const challengeIds = challenges.map((c) => c.id)
-      const { data: submissions } = await supabase
+      const challengeIds = challenges.map((c: { id: string }) => c.id)
+      const { data: submissions } = await db
         .from('challenge_submissions')
         .select('challenge_id')
         .eq('user_id', user.id)
         .in('challenge_id', challengeIds)
 
-      acceptedChallengeIds = submissions?.map((s) => s.challenge_id) || []
+      acceptedChallengeIds = submissions?.map((s: { challenge_id: string }) => s.challenge_id) || []
     }
 
     // Transform challenges for response
-    const transformedChallenges = challenges?.map((challenge) => ({
+    const transformedChallenges = challenges?.map((challenge: {
+      id: string; title: string; description: string; type: string;
+      standing_reward: number; ic_reward: number; participant_count: number;
+      expires_at: string; locality_name: string; created_at: string;
+      category: { id: string; name: string; icon: string } | null;
+      creator: { id: string; display_name: string; avatar_url: string; badge: string } | null;
+    }) => ({
       id: challenge.id,
       title: challenge.title,
       description: challenge.description,
@@ -214,8 +222,8 @@ export async function GET(request: NextRequest) {
 
     // Determine next cursor
     const nextCursor =
-      challenges && challenges.length === limit
-        ? challenges[challenges.length - 1].id
+      challenges && (challenges as { id: string }[]).length === limit
+        ? (challenges as { id: string }[])[challenges.length - 1].id
         : null
 
     return NextResponse.json({
