@@ -130,7 +130,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
@@ -146,7 +146,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm">
           {/* Info Box */}
           <div className="bg-gold/5 border border-gold/20 rounded-lg p-4 mb-6">
             <div className="flex gap-3">
@@ -174,7 +174,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-full flex items-center justify-between px-4 py-3
-                           border border-border rounded-lg bg-white
+                           border border-border rounded-lg bg-card text-foreground
                            hover:border-gold focus:border-gold focus:ring-2 focus:ring-gold/20
                            transition-all"
               >
@@ -185,7 +185,7 @@ export default function OnboardingPage() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute z-10 w-full mt-2 bg-white border border-border rounded-lg shadow-lg max-h-64 overflow-hidden">
+                <div className="absolute z-10 w-full mt-2 bg-card border border-border rounded-lg shadow-lg max-h-64 overflow-hidden">
                   {/* Search */}
                   <div className="p-2 border-b border-border">
                     <div className="relative">
@@ -195,7 +195,8 @@ export default function OnboardingPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search states..."
-                        className="w-full pl-9 pr-4 py-2 text-sm border border-border rounded-md
+                        className="w-full pl-9 pr-4 py-2 text-sm bg-muted border border-border rounded-md
+                                   text-foreground placeholder:text-muted-foreground
                                    focus:border-gold focus:ring-1 focus:ring-gold/20 outline-none"
                       />
                     </div>
@@ -239,7 +240,8 @@ export default function OnboardingPage() {
               value={cityName}
               onChange={(e) => setCityName(e.target.value)}
               placeholder="Enter your city or town name"
-              className="w-full px-4 py-3 border border-border rounded-lg
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg
+                         text-foreground placeholder:text-muted-foreground
                          focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none
                          transition-all"
             />
@@ -257,7 +259,7 @@ export default function OnboardingPage() {
 
           {/* Error */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
