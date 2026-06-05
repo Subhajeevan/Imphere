@@ -951,21 +951,48 @@ const mockSaves: Tables<'saves'>[] = [
 ]
 
 // ============================================================================
-// PART 13 — FOLLOWS (10)
+// PART 13 — FOLLOWS (generated)
+//
+// Deterministically generate follow relationships between the mock profiles
+// so each user follows 1–3 other users. Uses a small seeded RNG so output is
+// stable across runs but looks random.
 // ============================================================================
 
-const mockFollows: Tables<'follows'>[] = [
-  { id: 'l1000000-0000-0000-0000-000000000001', follower_id: USER_IDS.kiran,  following_id: USER_IDS.arjun,  created_at: daysAgo(85) },
-  { id: 'l1000000-0000-0000-0000-000000000002', follower_id: USER_IDS.kiran,  following_id: USER_IDS.priya,  created_at: daysAgo(80) },
-  { id: 'l1000000-0000-0000-0000-000000000003', follower_id: USER_IDS.dev,    following_id: USER_IDS.arjun,  created_at: daysAgo(70) },
-  { id: 'l1000000-0000-0000-0000-000000000004', follower_id: USER_IDS.dev,    following_id: USER_IDS.vikram, created_at: daysAgo(65) },
-  { id: 'l1000000-0000-0000-0000-000000000005', follower_id: USER_IDS.ananya, following_id: USER_IDS.priya,  created_at: daysAgo(160) },
-  { id: 'l1000000-0000-0000-0000-000000000006', follower_id: USER_IDS.ananya, following_id: USER_IDS.meera,  created_at: daysAgo(140) },
-  { id: 'l1000000-0000-0000-0000-000000000007', follower_id: USER_IDS.vikram, following_id: USER_IDS.arjun,  created_at: daysAgo(200) },
-  { id: 'l1000000-0000-0000-0000-000000000008', follower_id: USER_IDS.rahul,  following_id: USER_IDS.priya,  created_at: daysAgo(250) },
-  { id: 'l1000000-0000-0000-0000-000000000009', follower_id: USER_IDS.meera,  following_id: USER_IDS.arjun,  created_at: daysAgo(230) },
-  { id: 'l1000000-0000-0000-0000-000000000010', follower_id: USER_IDS.dev,    following_id: USER_IDS.rahul,  created_at: daysAgo(60) },
-]
+function mulberry32(a: number) {
+  return function () {
+    let t = (a += 0x6d2b79f5)
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+const _rand = mulberry32(42)
+const profileIds = mockProfiles.map(p => p.id)
+let followCounter = 1
+const generatedFollows: Tables<'follows'>[] = []
+
+for (const followerId of profileIds) {
+  const followCount = Math.floor(_rand() * 3) + 1 // 1..3
+  // shuffle deterministically
+  const shuffled = profileIds
+    .filter(id => id !== followerId)
+    .sort(() => (_rand() > 0.5 ? 1 : -1))
+
+  const targets = shuffled.slice(0, followCount)
+  for (const targetId of targets) {
+    const idSuffix = String(followCounter).padStart(3, '0')
+    generatedFollows.push({
+      id: `l1000000-0000-0000-0000-000000000${idSuffix}`,
+      follower_id: followerId,
+      following_id: targetId,
+      created_at: daysAgo(Math.floor(_rand() * 365)),
+    })
+    followCounter++
+  }
+}
+
+const mockFollows: Tables<'follows'>[] = generatedFollows
 
 // ============================================================================
 // PART 14 — IMPACT CIRCLES (3)
