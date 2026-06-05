@@ -15,12 +15,37 @@ interface UserResult {
   isFollowing: boolean
 }
 
+interface CurrentUser {
+  displayName: string
+  avatarUrl?: string
+  standing: number
+  badge: string
+}
+
 export default function ExplorePage() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<UserResult[]>([])
   const [suggestedUsers, setSuggestedUsers] = useState<UserResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>(undefined)
+
+  // Fetch the current logged-in user's profile for the sidebar
+  useEffect(() => {
+    fetch('/api/user/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.profile) {
+          setCurrentUser({
+            displayName: data.profile.displayName,
+            avatarUrl:   data.profile.avatarUrl,
+            standing:    data.profile.standing ?? 0,
+            badge:       data.profile.badge ?? 'Citizen',
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Fetch suggested users on mount
   useEffect(() => {
@@ -93,7 +118,7 @@ export default function ExplorePage() {
   const displayUsers = query.trim() ? results : suggestedUsers
 
   return (
-    <AppLayout>
+    <AppLayout user={currentUser}>
       {/* Search Header */}
       <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border p-4 transition-colors duration-300">
         <div className="relative">
