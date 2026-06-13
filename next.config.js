@@ -14,6 +14,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.supabase.co', // Supabase storage
       },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos', // Mock data images
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com', // Mock data avatars
+      },
     ],
   },
   experimental: {

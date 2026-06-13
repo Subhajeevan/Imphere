@@ -7,12 +7,13 @@ import { NextResponse } from 'next/server'
  */
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() as any as any as any
 
     const { data: categories, error } = await supabase
       .from('challenge_categories')
-      .select('id, name, slug, icon, description')
-      .order('name')
+      .select('id, name, icon, color, description')
+      .eq('is_active', true)
+      .order('display_order')
 
     if (error) {
       console.error('Categories fetch error:', error)

@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const { id: targetUserId } = await params
-    const supabase = await createClient()
+    const supabase = await createClient() as any
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -76,7 +76,7 @@ export async function DELETE(
 ) {
   try {
     const { id: targetUserId } = await params
-    const supabase = await createClient()
+    const supabase = await createClient() as any
     const {
       data: { user },
     } = await supabase.auth.getUser()

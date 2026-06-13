@@ -1,166 +1,221 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { cn, formatCompactNumber } from '@/lib/utils'
-import { Plus, Lock, Users, Trophy, Star } from 'lucide-react'
+import { CircleCard } from '@/components/community/CircleCard'
+import { cn } from '@/lib/utils'
+import { useCreatedCircles, CreatedCircle } from '@/hooks/useCreatedCircles'
 
 interface Circle {
   id: string
   name: string
-  avatar_url?: string
-  mission_statement?: string
+  avatar_url?: string | null
+  category: string
   member_count: number
   eminence_score: number
+  weeklyRank: number
+  isJoined?: boolean
+  userRank?: number
 }
 
 interface CommunityPageProps {
   user?: {
+    id?: string
     displayName: string
     avatarUrl?: string
     standing: number
     badge: string
   }
-  userBadge: string
   circles: Circle[]
+  discoverCircles: Circle[]
 }
 
-export function CommunityPage({ user, userBadge, circles }: CommunityPageProps) {
-  const canCreateCircle = userBadge !== 'Citizen'
-  const [leaderboard, setLeaderboard] = useState<Circle[]>([])
-  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false)
+export function CommunityPage({ user, circles, discoverCircles }: CommunityPageProps) {
+  const { createdCircles } = useCreatedCircles()
+  const [activeTab, setActiveTab] = useState<'my-circles' | 'discover'>('my-circles')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [joinedCircleIds, setJoinedCircleIds] = useState<string[]>(() => circles.map((circle) => circle.id))
+
+  useEffect(() => {
+    const createdJoinedIds = createdCircles.filter((circle) => circle.isJoined).map((circle) => circle.id)
+    setJoinedCircleIds((current) => Array.from(new Set([...current, ...createdJoinedIds])))
+  }, [createdCircles])
+
+  const joinedCircleSet = useMemo(() => new Set(joinedCircleIds), [joinedCircleIds])
+  const mergedDiscoverCircles = useMemo(() => {
+    const map = new Map<string, Circle | CreatedCircle>()
+    createdCircles.forEach((circle) => {
+      map.set(circle.id, circle)
+    })
+    discoverCircles.forEach((circle) => {
+      if (!map.has(circle.id)) {
+        map.set(circle.id, circle)
+      }
+    })
+    return Array.from(map.values())
+  }, [createdCircles, discoverCircles])
+
+  const filteredDiscoverCircles = useMemo(
+    () =>
+      mergedDiscoverCircles.filter((circle) => {
+        const query = searchQuery.trim().toLowerCase()
+        if (!query) return true
+        return (
+          circle.name.toLowerCase().includes(query) ||
+          circle.category.toLowerCase().includes(query)
+        )
+      }),
+    [mergedDiscoverCircles, searchQuery]
+  )
+
+  const myCircles = useMemo(
+    () => mergedDiscoverCircles.filter((circle) => joinedCircleSet.has(circle.id)),
+    [mergedDiscoverCircles, joinedCircleSet]
+  )
+
+  const handleToggleJoin = (circleId: string) => {
+    setJoinedCircleIds((current) =>
+      current.includes(circleId) ? current.filter((id) => id !== circleId) : [...current, circleId]
+    )
+  }
 
   return (
     <AppLayout user={user}>
-      {/* Header */}
-      <div className="bg-white border-b border-border px-4 py-4">
-        <h1 className="text-xl font-serif font-bold text-foreground">
-          Impact Circles
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Join forces to multiply your impact
-        </p>
-      </div>
-
-      {/* Create Circle Section */}
-      <div className="p-4">
-        {canCreateCircle ? (
-          <Link
-            href="/community/create"
-            className="flex items-center gap-4 p-4 border-2 border-dashed border-gold/50 rounded-lg
-                       hover:border-gold hover:bg-gold/5 transition-colors"
-          >
-            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
-              <Plus className="w-6 h-6 text-gold" />
-            </div>
+      <div className="space-y-6 px-4 py-5 sm:px-0">
+        <div className="rounded-3xl border border-border bg-card p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-medium text-foreground">Form an Impact Circle</p>
-              <p className="text-sm text-muted-foreground">
-                Unite citizens around a shared mission
+              <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">Impact Circles</p>
+              <h1 className="mt-3 text-3xl font-serif font-bold text-foreground">Your circle network</h1>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                Find the circles you have joined and discover new citizen-led groups with mock-backed data.
               </p>
             </div>
-          </Link>
-        ) : (
-          <div className="p-4 bg-muted/30 border border-border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <Lock className="w-6 h-6 text-muted-foreground" />
+            <Link
+              href="/create/circle"
+              className="inline-flex items-center justify-center rounded-3xl bg-gold px-4 py-3 text-sm font-semibold text-black transition hover:bg-gold-dark"
+            >
+              Create Circle
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'my-circles', label: 'My Circles' },
+            { id: 'discover', label: 'Discover Circles' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id as 'my-circles' | 'discover')}
+              className={cn(
+                'rounded-full px-4 py-2 text-sm font-medium transition',
+                activeTab === tab.id ? 'bg-gold text-black' : 'bg-muted text-muted-foreground hover:bg-muted/70'
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'discover' && (
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-border bg-background p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Discover Circles</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Search by circle name or category and join the groups that matter most.
+                  </p>
+                </div>
+                <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                  {filteredDiscoverCircles.length} circles
+                </span>
               </div>
-              <div>
-                <p className="font-medium text-muted-foreground">
-                  Unlock at Bronze Badge
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Achieve Bronze rank to create Impact Circles
-                </p>
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-badge-bronze transition-all"
-                  style={{ width: `${Math.min((user?.standing || 0) / 500 * 100, 100)}%` }}
+
+              <div className="mt-4">
+                <label htmlFor="circle-search" className="sr-only">
+                  Search circles
+                </label>
+                <input
+                  id="circle-search"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search circles by name or category"
+                  className="w-full rounded-3xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
                 />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground text-center">
-                {formatCompactNumber(user?.standing || 0)} / 500 Standing to Bronze
-              </p>
             </div>
+
+            {filteredDiscoverCircles.length === 0 ? (
+              <div className="rounded-3xl border border-border bg-muted/30 p-8 text-center text-muted-foreground">
+                No circles match that search.
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {filteredDiscoverCircles.map((circle) => (
+                  <CircleCard
+                    key={circle.id}
+                    id={circle.id}
+                    name={circle.name}
+                    logoUrl={circle.avatar_url ?? undefined}
+                    category={circle.category}
+                    memberCount={circle.member_count}
+                    weeklyRank={circle.weeklyRank}
+                    isJoined={joinedCircleIds.includes(circle.id)}
+                    onToggleJoin={() => handleToggleJoin(circle.id)}
+                    href={`/community/${circle.id}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      {/* My Circles */}
-      <div className="p-4 pt-0">
-        <h2 className="font-medium text-foreground mb-3 flex items-center gap-2">
-          <Users className="w-4 h-4" />
-          My Circles
-        </h2>
-
-        {circles.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>You haven't joined any circles yet</p>
-            <p className="text-sm mt-1">
-              Join or create an Impact Circle to collaborate with others
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {circles.map((circle) => (
-              <Link
-                key={circle.id}
-                href={`/community/${circle.id}`}
-                className="flex items-center gap-3 p-3 border border-border rounded-lg
-                           hover:border-gold/50 hover:bg-gold/5 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                  {circle.avatar_url ? (
-                    <img
-                      src={circle.avatar_url}
-                      alt={circle.name}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <Users className="w-6 h-6 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">
-                    {circle.name}
-                  </p>
+        {activeTab === 'my-circles' && (
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-border bg-background p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">My Circles</h2>
                   <p className="text-sm text-muted-foreground">
-                    {circle.member_count} members
+                    Access the circles you have joined and open their detail screens.
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gold flex items-center gap-1">
-                    <Star className="w-4 h-4" />
-                    {formatCompactNumber(circle.eminence_score)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Eminence</p>
-                </div>
-              </Link>
-            ))}
+                <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+                  {myCircles.length} joined
+                </span>
+              </div>
+            </div>
+
+            {myCircles.length === 0 ? (
+              <div className="rounded-3xl border border-border bg-muted/30 p-8 text-center text-muted-foreground">
+                You haven’t joined any circles yet.
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {myCircles.map((circle) => (
+                  <CircleCard
+                    key={circle.id}
+                    id={circle.id}
+                    name={circle.name}
+                    logoUrl={circle.avatar_url ?? undefined}
+                    category={circle.category}
+                    memberCount={circle.member_count}
+                    weeklyRank={circle.weeklyRank}
+                    isJoined
+                    userRank={circle.userRank}
+                    onToggleJoin={() => handleToggleJoin(circle.id)}
+                    href={`/community/${circle.id}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
-
-      {/* Leaderboard */}
-      <div className="p-4 border-t border-border">
-        <h2 className="font-medium text-foreground mb-3 flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-gold" />
-          Regional Leaderboard
-        </h2>
-
-        <div className="text-center py-8 text-muted-foreground">
-          <Trophy className="w-12 h-12 mx-auto mb-4 text-gold/30" />
-          <p>Coming soon</p>
-          <p className="text-sm mt-1">
-            Compete with other circles in your region
-          </p>
-        </div>
       </div>
     </AppLayout>
   )

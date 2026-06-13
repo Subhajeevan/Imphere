@@ -3,15 +3,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Trophy, Users, User, Bell, Plus } from 'lucide-react'
+import { Home, Search, Trophy, BarChart3, User, Bell, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const bottomNavItems = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/explore', icon: Search, label: 'Explore' },
-  { href: '/challenges', icon: Trophy, label: 'Challenges' },
-  { href: '/community', icon: Users, label: 'Community' },
-  { href: '/profile', icon: User, label: 'Profile' },
+  { href: '/',            icon: Home,       label: 'Home' },
+  { href: '/explore',     icon: Search,     label: 'Explore' },
+  { href: '/challenges',  icon: Trophy,     label: 'Challenges' },
+  { href: '/leaderboard', icon: BarChart3,  label: 'Leaders' },
+  { href: '/profile',     icon: User,       label: 'Profile' },
 ]
 
 interface MobileNavProps {
@@ -20,7 +20,7 @@ interface MobileNavProps {
 
 export function MobileTopBar({ notificationCount = 0 }: MobileNavProps) {
   return (
-    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
+    <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border transition-colors duration-300">
       <div className="flex items-center justify-between px-4 h-14">
         {/* Logo */}
         <Link href="/">
@@ -60,10 +60,10 @@ export function MobileBottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border safe-area-inset-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-inset-bottom transition-colors duration-300">
       <div className="flex items-center justify-around h-16">
         {bottomNavItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
           return (
             <Link
               key={item.href}

@@ -15,12 +15,37 @@ interface UserResult {
   isFollowing: boolean
 }
 
+interface CurrentUser {
+  displayName: string
+  avatarUrl?: string
+  standing: number
+  badge: string
+}
+
 export default function ExplorePage() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<UserResult[]>([])
   const [suggestedUsers, setSuggestedUsers] = useState<UserResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>(undefined)
+
+  // Fetch the current logged-in user's profile for the sidebar
+  useEffect(() => {
+    fetch('/api/user/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.profile) {
+          setCurrentUser({
+            displayName: data.profile.displayName,
+            avatarUrl:   data.profile.avatarUrl,
+            standing:    data.profile.standing ?? 0,
+            badge:       data.profile.badge ?? 'Citizen',
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Fetch suggested users on mount
   useEffect(() => {
@@ -93,9 +118,9 @@ export default function ExplorePage() {
   const displayUsers = query.trim() ? results : suggestedUsers
 
   return (
-    <AppLayout>
+    <AppLayout user={currentUser}>
       {/* Search Header */}
-      <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border p-4">
+      <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border p-4 transition-colors duration-300">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
@@ -168,7 +193,7 @@ export default function ExplorePage() {
                     {user.avatarUrl ? (
                       <img
                         src={user.avatarUrl}
-                        alt={user.displayName}
+                        alt={user.displayName ?? 'Unknown User'}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -180,11 +205,11 @@ export default function ExplorePage() {
                 <div className="flex-1 min-w-0">
                   <Link href={`/profile/${user.id}`}>
                     <p className="font-medium text-foreground truncate hover:text-gold">
-                      {user.displayName}
+                      {user.displayName ?? 'Unknown User'}
                     </p>
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    {formatCompactNumber(user.standing)} Standing
+                    {formatCompactNumber(user.standing ?? 0)} Standing
                   </p>
                 </div>
 

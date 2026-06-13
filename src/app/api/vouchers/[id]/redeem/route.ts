@@ -12,8 +12,8 @@ export async function POST(
 ) {
   try {
     const { id: voucherId } = await params
-    const supabase = await createClient()
-    const adminClient = createAdminClient()
+    const supabase = await createClient() as any
+    const adminClient = await createAdminClient() as any
 
     const {
       data: { user },

@@ -1,9 +1,35 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ChallengesPage } from './ChallengesPage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
-  const supabase = await createClient()
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    return (
+      <ChallengesPage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url ?? undefined,
+                standing: profile.standing ?? 0,
+                badge: profile.badge ?? 'Citizen',
+              }
+            : undefined
+        }
+        categories={mockData.challengeCategories.map(c => ({
+          id: c.id,
+          name: c.name,
+          icon: c.icon,
+          color: c.color
+        }))}
+      />
+    )
+  }
+
+  const supabase = await createClient() as any as any
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -19,11 +45,12 @@ export default async function Page() {
     .eq('id', user.id)
     .single()
 
-  // Fetch challenge categories
+  // Fetch challenge categories (no 'slug' column in schema)
   const { data: categories } = await supabase
     .from('challenge_categories')
-    .select('id, name, slug, icon')
-    .order('name')
+    .select('id, name, icon, color')
+    .eq('is_active', true)
+    .order('display_order')
 
   return (
     <ChallengesPage
@@ -31,9 +58,9 @@ export default async function Page() {
         profile
           ? {
               displayName: profile.display_name,
-              avatarUrl: profile.avatar_url,
-              standing: profile.standing,
-              badge: profile.badge,
+              avatarUrl: profile.avatar_url ?? undefined,
+              standing: profile.standing ?? 0,
+              badge: profile.badge ?? 'Citizen',
             }
           : undefined
       }
@@ -41,3 +68,4 @@ export default async function Page() {
     />
   )
 }
+

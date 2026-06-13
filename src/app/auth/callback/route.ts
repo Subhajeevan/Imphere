@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const type = searchParams.get('type') // 'signup', 'recovery', etc.
 
   if (code) {
-    const supabase = await createClient()
+const supabase = await createClient() as any
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (!error) {

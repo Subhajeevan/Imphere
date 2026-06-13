@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Clock, MapPin, Users, Trophy, Coins, CheckCircle } from 'lucide-react'
+import { Camera, Clock, MapPin, Users, Trophy, Coins, CheckCircle } from 'lucide-react'
 import { cn, formatCompactNumber, getBadgeColorClass } from '@/lib/utils'
 
 interface ChallengeCardProps {
@@ -65,7 +65,7 @@ export function ChallengeCard({
   const timeRemaining = getTimeRemaining()
 
   return (
-    <article className="p-4 border border-border rounded-lg bg-white hover:shadow-md transition-shadow">
+    <article className="p-4 border border-border rounded-lg bg-card hover:shadow-md transition-all duration-300">
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         {/* Category Icon */}
@@ -82,13 +82,15 @@ export function ChallengeCard({
             </h3>
           </Link>
           {category && (
-            <span className="text-xs text-muted-foreground">{category.name}</span>
+            <span className="text-xs text-muted-foreground">{category?.name ?? 'Category'}</span>
           )}
         </div>
 
         {/* Status Badge */}
         {isAccepted && (
-          <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+          <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400
+                          bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800
+                          px-2 py-1 rounded-full flex-shrink-0">
             <CheckCircle className="w-3 h-3" />
             Accepted
           </span>
@@ -107,33 +109,33 @@ export function ChallengeCard({
             className={cn(
               'w-8 h-8 rounded-full bg-muted flex items-center justify-center',
               'ring-2',
-              getBadgeColorClass(creator.badge)
+              getBadgeColorClass(creator?.badge ?? 'Citizen')
             )}
           >
-            {creator.avatarUrl ? (
+            {creator?.avatarUrl ? (
               <img
                 src={creator.avatarUrl}
-                alt={creator.displayName}
+                alt={creator.displayName ?? 'User'}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <span className="text-xs font-medium text-muted-foreground">
-                {creator.displayName.charAt(0)}
+                {(creator?.displayName ?? 'U').charAt(0)}
               </span>
             )}
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Raised by</p>
-            <p className="text-sm font-medium">{creator.displayName}</p>
+            <p className="text-sm font-medium">{creator?.displayName ?? 'User'}</p>
           </div>
         </div>
       )}
 
       {/* Participant count for proclamations */}
-      {isProclamation && participantCount > 0 && (
+      {isProclamation && (participantCount ?? 0) > 0 && (
         <div className="mb-4 p-2 bg-muted/30 rounded-lg">
           <span className="text-sm text-muted-foreground">
-            {formatCompactNumber(participantCount)} backers
+            {formatCompactNumber(participantCount ?? 0)} backers
           </span>
         </div>
       )}
@@ -146,10 +148,10 @@ export function ChallengeCard({
             {timeRemaining}
           </span>
         )}
-        {!isProclamation && participantCount > 0 && (
+        {!isProclamation && (participantCount ?? 0) > 0 && (
           <span className="flex items-center gap-1">
             <Users className="w-3.5 h-3.5" />
-            {formatCompactNumber(participantCount)} completed
+            {formatCompactNumber(participantCount ?? 0)} completed
           </span>
         )}
         {localityName && (
@@ -164,12 +166,12 @@ export function ChallengeCard({
       <div className="flex items-center gap-4 mb-4">
         <div className="flex items-center gap-1 text-sm">
           <Trophy className="w-4 h-4 text-gold" />
-          <span className="font-medium">+{standingReward}</span>
+          <span className="font-medium">+{standingReward ?? 0}</span>
           <span className="text-muted-foreground">Standing</span>
         </div>
         <div className="flex items-center gap-1 text-sm">
           <Coins className="w-4 h-4 text-gold" />
-          <span className="font-medium">+{creditReward}</span>
+          <span className="font-medium">+{creditReward ?? 0}</span>
           <span className="text-muted-foreground">IC</span>
         </div>
       </div>
@@ -186,10 +188,12 @@ export function ChallengeCard({
       ) : (
         <Link
           href={`/challenges/${id}/submit`}
-          className="block w-full py-2.5 text-center bg-gold/10 text-gold font-medium rounded-lg
-                     hover:bg-gold/20 transition-colors"
+          className="flex items-center justify-center gap-2 w-full py-2.5
+                     bg-gradient-to-r from-gold to-gold-dark text-white font-medium rounded-lg
+                     hover:opacity-90 transition-opacity shadow-sm shadow-gold/20"
         >
-          Submit Proof
+          <Camera className="w-4 h-4" />
+          Submit Proof & Claim Rewards
         </Link>
       )}
     </article>
@@ -201,7 +205,7 @@ export function ChallengeCard({
  */
 export function ChallengeCardSkeleton() {
   return (
-    <article className="p-4 border border-border rounded-lg bg-white animate-pulse">
+    <article className="p-4 border border-border rounded-lg bg-card animate-pulse transition-colors duration-300">
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-lg bg-muted" />
         <div className="flex-1">

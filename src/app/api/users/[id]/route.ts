@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 /**
  * GET /api/users/[id]
@@ -11,7 +13,44 @@ export async function GET(
 ) {
   try {
     const { id: userId } = await params
-    const supabase = await createClient()
+    
+    if (USE_MOCK_DATA) {
+      const currentUserId = USER_IDS.arjun
+      
+      const profile = mockData.profiles.find(p => p.id === userId)
+      if (!profile) {
+        return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      }
+
+      const isFollowing = mockData.follows.some(f => f.follower_id === currentUserId && f.following_id === userId)
+      
+      const postCount = mockData.posts.filter(p => p.author_id === userId && p.moderation_status === 'approved').length
+      const challengeCount = mockData.challengeSubmissions.filter(s => s.user_id === userId && s.status === 'verified').length
+      const followerCount = mockData.follows.filter(f => f.following_id === userId).length
+      const followingCount = mockData.follows.filter(f => f.follower_id === userId).length
+
+      return NextResponse.json({
+        profile: {
+          id: profile.id,
+          displayName: profile.display_name,
+          avatarUrl: profile.avatar_url,
+          bio: profile.bio,
+          standing: profile.standing,
+          impactCredits: profile.impact_credits,
+          badge: profile.badge,
+          nativePin: profile.native_pin_name,
+          believers: followerCount,
+          believing: followingCount,
+          postCount,
+          challengeCount,
+          isFollowing,
+          isOwnProfile: currentUserId === userId,
+          createdAt: profile.created_at,
+        },
+      })
+    }
+
+    const supabase = await createClient() as any
     const {
       data: { user: currentUser },
     } = await supabase.auth.getUser()

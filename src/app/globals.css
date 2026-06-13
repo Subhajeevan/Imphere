@@ -100,7 +100,7 @@
 
   /* Card styles */
   .card-civic {
-    @apply bg-white rounded-lg border border-border p-4 shadow-sm;
+    @apply bg-card rounded-lg border border-border p-4 shadow-sm;
   }
 
   /* Gold accented elements */

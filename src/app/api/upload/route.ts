@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   try {
     // Verify user is authenticated
-    const supabase = await createClient()
+    const supabase = await createClient() as any as any as any
     const {
       data: { user },
     } = await supabase.auth.getUser()

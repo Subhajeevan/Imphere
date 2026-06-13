@@ -2,6 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database.types'
 
+type SupabaseCookie = {
+  name: string
+  value: string
+  options?: Record<string, unknown>
+}
+
 /**
  * Creates a Supabase client for use in Server Components, Route Handlers, and Server Actions
  *
@@ -27,7 +33,7 @@ import type { Database } from '@/types/database.types'
  * }
  * ```
  */
-export async function createClient() {
+export async function createClient(): Promise<any> {
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -38,10 +44,10 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: SupabaseCookie[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options as any)
             )
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -58,11 +64,11 @@ export async function createClient() {
  * USE WITH CAUTION - bypasses Row Level Security
  *
  * Only use for:
- * - Admin operations
- * - Background jobs
- * - Operations that need to bypass RLS
+ * - server processes
+ * - background jobs
+ * - trusted internal workflows where bypassing RLS is required
  */
-export async function createAdminClient() {
+export async function createAdminClient(): Promise<any> {
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -73,10 +79,10 @@ export async function createAdminClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: SupabaseCookie[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options as any)
             )
           } catch {
             // Ignore in Server Components

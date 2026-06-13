@@ -1,9 +1,35 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { SettingsPage } from './SettingsPage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
-  const supabase = await createClient()
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    return (
+      <SettingsPage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url ?? undefined,
+                standing: profile.standing ?? 0,
+                badge: profile.badge ?? 'Citizen',
+              }
+            : undefined
+        }
+        profile={{
+          displayName: profile?.display_name || '',
+          bio: profile?.bio || '',
+          avatarUrl: profile?.avatar_url ?? undefined,
+        }}
+        email={profile?.email || 'arjun.mehta@imphere.app'}
+      />
+    )
+  }
+
+  const supabase = await createClient() as any
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -25,9 +51,9 @@ export default async function Page() {
         profile
           ? {
               displayName: profile.display_name,
-              avatarUrl: profile.avatar_url,
-              standing: profile.standing,
-              badge: profile.badge,
+              avatarUrl: profile.avatar_url ?? undefined,
+              standing: profile.standing ?? 0,
+              badge: profile.badge ?? 'Citizen',
             }
           : undefined
       }
@@ -40,3 +66,4 @@ export default async function Page() {
     />
   )
 }
+

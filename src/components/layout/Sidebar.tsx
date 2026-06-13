@@ -13,21 +13,23 @@ import {
   ShoppingBag,
   Settings,
   Plus,
+  BarChart3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/explore', icon: Search, label: 'Explore' },
-  { href: '/challenges', icon: Trophy, label: 'Challenges' },
-  { href: '/community', icon: Users, label: 'Community' },
-  { href: '/profile', icon: User, label: 'Profile' },
+  { href: '/',            icon: Home,      label: 'Home' },
+  { href: '/explore',     icon: Search,    label: 'Explore' },
+  { href: '/challenges',  icon: Trophy,    label: 'Challenges' },
+  { href: '/leaderboard', icon: BarChart3, label: 'Leaderboard' },
+  { href: '/community',   icon: Users,     label: 'Community' },
+  // { href: '/profile',     icon: User,      label: 'Profile' },
 ]
 
 const secondaryItems = [
-  { href: '/notifications', icon: Bell, label: 'Notifications' },
-  { href: '/exchange', icon: ShoppingBag, label: 'Exchange' },
-  { href: '/settings', icon: Settings, label: 'Settings' },
+  { href: '/notifications', icon: Bell,        label: 'Notifications' },
+  { href: '/exchange',      icon: ShoppingBag, label: 'Exchange' },
+  { href: '/settings',      icon: Settings,    label: 'Settings' },
 ]
 
 interface SidebarProps {
@@ -42,10 +44,19 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
 
+  /**
+   * Active-match logic:
+   *   - "/" matches only exactly "/"
+   *   - all other routes: startsWith so sub-routes are also highlighted
+   */
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border bg-white">
+    /* sticky + h-screen keeps the sidebar fixed while main content scrolls */
+    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border bg-card transition-colors duration-300 overflow-y-auto scrollbar-hide">
       {/* Logo */}
-      <div className="p-6">
+      <div className="p-6 flex-shrink-0">
         <Link href="/" className="block">
           <Image
             src="/logo-gold.png"
@@ -58,23 +69,23 @@ export function Sidebar({ user }: SidebarProps) {
         </Link>
       </div>
 
-      {/* Primary Navigation */}
-      <nav className="flex-1 px-3">
+      {/* Primary Navigation — flex-1 so it fills available space */}
+      <nav className="flex-1 px-3 min-h-0">
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const active = isActive(item.href)
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-                    isActive
+                    active
                       ? 'bg-gold/10 text-gold font-medium'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -101,19 +112,19 @@ export function Sidebar({ user }: SidebarProps) {
         {/* Secondary Navigation */}
         <ul className="space-y-1">
           {secondaryItems.map((item) => {
-            const isActive = pathname === item.href
+            const active = isActive(item.href)
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-                    isActive
+                    active
                       ? 'bg-gold/10 text-gold font-medium'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   )}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -122,9 +133,9 @@ export function Sidebar({ user }: SidebarProps) {
         </ul>
       </nav>
 
-      {/* User Profile Card */}
-      {user && (
-        <div className="p-4 border-t border-border">
+      {/* User Profile Card — always at the bottom */}
+      <div className="flex-shrink-0 p-4 border-t border-border">
+        {user ? (
           <Link
             href="/profile"
             className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
@@ -133,10 +144,10 @@ export function Sidebar({ user }: SidebarProps) {
               className={cn(
                 'w-10 h-10 rounded-full bg-muted flex items-center justify-center',
                 'ring-2',
-                user.badge === 'Gold' && 'ring-badge-gold',
-                user.badge === 'Silver' && 'ring-badge-silver',
-                user.badge === 'Bronze' && 'ring-badge-bronze',
-                user.badge === 'Citizen' && 'ring-badge-citizen'
+                user.badge === 'Gold'    && 'ring-yellow-400',
+                user.badge === 'Silver'  && 'ring-slate-400',
+                user.badge === 'Bronze'  && 'ring-amber-600',
+                user.badge === 'Citizen' && 'ring-border'
               )}
             >
               {user.avatarUrl ? (
@@ -150,16 +161,23 @@ export function Sidebar({ user }: SidebarProps) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate">
-                {user.displayName}
-              </p>
+              <p className="font-medium text-foreground truncate text-sm">{user.displayName}</p>
               <p className="text-xs text-muted-foreground">
-                {user.standing.toLocaleString()} Standing
+                {user.standing.toLocaleString()} Standing · {user.badge}
               </p>
             </div>
           </Link>
-        </div>
-      )}
+        ) : (
+          /* Skeleton placeholder keeps footer height consistent */
+          <div className="flex items-center gap-3 p-2">
+            <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3 bg-muted rounded w-24 animate-pulse" />
+              <div className="h-2.5 bg-muted rounded w-16 animate-pulse" />
+            </div>
+          </div>
+        )}
+      </div>
     </aside>
   )
 }

@@ -95,6 +95,7 @@ export function ImageUpload({
         ref={inputRef}
         type="file"
         accept="image/*"
+        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
         disabled={isUploading}

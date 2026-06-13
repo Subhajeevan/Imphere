@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProfilePhotoUpload } from '@/components/ui/ImageUpload'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import {
   User,
   Lock,
@@ -12,6 +13,11 @@ import {
   Trash2,
   ChevronRight,
   AlertTriangle,
+  Palette,
+  Sun,
+  Moon,
+  Laptop,
+  Check,
 } from 'lucide-react'
 
 interface SettingsPageProps {
@@ -35,6 +41,35 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
   const [profile, setProfile] = useState(initialProfile)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('hs_theme') as 'light' | 'dark' | 'auto'
+      if (savedTheme) {
+        setTheme(savedTheme)
+      }
+    }
+  }, [])
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'auto') => {
+    setTheme(newTheme)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hs_theme', newTheme)
+      const html = document.documentElement
+      const isDark =
+        newTheme === 'dark' ||
+        (newTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+
+      if (isDark) {
+        html.classList.add('dark')
+        html.classList.remove('light')
+      } else {
+        html.classList.remove('dark')
+        html.classList.add('light')
+      }
+    }
+  }
 
   const handleProfileUpdate = async () => {
     setIsSaving(true)
@@ -83,6 +118,12 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
       description: 'Change your name, bio, and photo',
     },
     {
+      id: 'theme',
+      icon: Palette,
+      label: 'Theme Customization',
+      description: 'Choose between Light, Dark, or System mode',
+    },
+    {
       id: 'password',
       icon: Lock,
       label: 'Change Password',
@@ -93,11 +134,11 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
   return (
     <AppLayout user={user}>
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border px-4 py-4">
+      {/* <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border px-4 py-4 transition-colors duration-300">
         <h1 className="text-xl font-serif font-bold text-foreground">
           Settings
         </h1>
-      </div>
+      </div> */}
 
       {/* Mobile Menu / Desktop Sidebar Content */}
       {!activeSection && (
@@ -194,8 +235,8 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
               onChange={(e) =>
                 setProfile((p) => ({ ...p, displayName: e.target.value }))
               }
-              className="w-full px-4 py-3 border border-border rounded-lg
-                         focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+              className="w-full px-4 py-3 bg-card text-foreground border border-border rounded-lg
+                         focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-colors duration-200"
             />
           </div>
 
@@ -211,9 +252,9 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
               }
               rows={3}
               maxLength={160}
-              className="w-full px-4 py-3 border border-border rounded-lg
+              className="w-full px-4 py-3 bg-card text-foreground border border-border rounded-lg
                          focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none
-                         resize-none"
+                         resize-none transition-colors duration-200"
               placeholder="Tell us about yourself..."
             />
             <p className="text-xs text-muted-foreground mt-1">
@@ -239,6 +280,99 @@ export function SettingsPage({ user, profile: initialProfile, email }: SettingsP
               'Save Changes'
             )}
           </button>
+        </div>
+      )}
+
+      {/* Theme Customization Section */}
+      {activeSection === 'theme' && (
+        <div className="p-4">
+          <button
+            onClick={() => setActiveSection(null)}
+            className="text-gold hover:underline text-sm mb-4 block"
+          >
+            ← Back to Settings
+          </button>
+
+          <h2 className="text-lg font-serif font-bold text-foreground mb-1">
+            Theme Customization
+          </h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Personalize your IMPHERE interface. Choose between our light, dark, or system matching theme designs.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Light Mode Option */}
+            <button
+              onClick={() => handleThemeChange('light')}
+              className={cn(
+                "relative flex flex-col items-center justify-between p-5 border rounded-xl transition-all duration-300 text-center outline-none group bg-card",
+                theme === 'light'
+                  ? "border-gold ring-2 ring-gold/20 shadow-md scale-[1.02]"
+                  : "border-border hover:border-gold/50 hover:bg-gold/5"
+              )}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-yellow-100 dark:bg-yellow-950/30 text-yellow-600 dark:text-yellow-500 mb-4 transition-transform group-hover:scale-110">
+                <Sun className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">Light Mode</h3>
+              {/* <p className="text-xs text-muted-foreground leading-relaxed">
+                Crisp background with elegant high contrast typography and gold cues.
+              </p> */}
+              {theme === 'light' && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gold flex items-center justify-center text-white">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+              )}
+            </button>
+
+            {/* Dark Mode Option */}
+            <button
+              onClick={() => handleThemeChange('dark')}
+              className={cn(
+                "relative flex flex-col items-center justify-between p-5 border rounded-xl transition-all duration-300 text-center outline-none group bg-card",
+                theme === 'dark'
+                  ? "border-gold ring-2 ring-gold/20 shadow-md scale-[1.02]"
+                  : "border-border hover:border-gold/50 hover:bg-gold/5"
+              )}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 mb-4 transition-transform group-hover:scale-110">
+                <Moon className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">Dark Mode</h3>
+              {/* <p className="text-xs text-muted-foreground leading-relaxed">
+                Soothing dark palettes optimized for low-light civic engagement.
+              </p> */}
+              {theme === 'dark' && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gold flex items-center justify-center text-white">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+              )}
+            </button>
+
+            {/* Auto (System) Option */}
+            <button
+              onClick={() => handleThemeChange('auto')}
+              className={cn(
+                "relative flex flex-col items-center justify-between p-5 border rounded-xl transition-all duration-300 text-center outline-none group bg-card",
+                theme === 'auto'
+                  ? "border-gold ring-2 ring-gold/20 shadow-md scale-[1.02]"
+                  : "border-border hover:border-gold/50 hover:bg-gold/5"
+              )}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800/40 text-slate-600 dark:text-slate-400 mb-4 transition-transform group-hover:scale-110">
+                <Laptop className="w-6 h-6" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">System Mode</h3>
+              {/* <p className="text-xs text-muted-foreground leading-relaxed">
+                Automatically matches your device's operating system preferences.
+              </p> */}
+              {theme === 'auto' && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-gold flex items-center justify-center text-white">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -333,8 +467,8 @@ function PasswordChangeForm() {
           }
           required
           minLength={6}
-          className="w-full px-4 py-3 border border-border rounded-lg
-                     focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+          className="w-full px-4 py-3 bg-card text-foreground border border-border rounded-lg
+                     focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-colors duration-200"
         />
       </div>
 
@@ -349,8 +483,8 @@ function PasswordChangeForm() {
             setFormData((f) => ({ ...f, confirmPassword: e.target.value }))
           }
           required
-          className="w-full px-4 py-3 border border-border rounded-lg
-                     focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none"
+          className="w-full px-4 py-3 bg-card text-foreground border border-border rounded-lg
+                     focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-colors duration-200"
         />
       </div>
 

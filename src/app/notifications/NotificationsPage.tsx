@@ -39,23 +39,35 @@ const notificationIcons: Record<string, typeof Bell> = {
   vouch: ChevronUp,
   comment: MessageCircle,
   follow: UserPlus,
-  challenge_approved: Trophy,
+  // DB enum uses challenge_verified / challenge_rejected
+  challenge_verified: Trophy,
   challenge_rejected: Trophy,
+  // legacy names kept for backward compatibility
+  challenge_approved: Trophy,
+  ic_credited: Coins,
   credit_earned: Coins,
-  badge_upgrade: CheckCircle,
+  proclamation_threshold: Trophy,
   circle_invite: Users,
+  circle_task: Users,
+  mention: MessageCircle,
+  system: Bell,
   default: Bell,
 }
 
 const notificationColors: Record<string, string> = {
   vouch: 'bg-gold/10 text-gold',
-  comment: 'bg-blue-100 text-blue-600',
-  follow: 'bg-purple-100 text-purple-600',
-  challenge_approved: 'bg-green-100 text-green-600',
-  challenge_rejected: 'bg-red-100 text-red-600',
+  comment: 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400',
+  follow: 'bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400',
+  challenge_verified: 'bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400',
+  challenge_approved: 'bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400',
+  challenge_rejected: 'bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400',
+  ic_credited: 'bg-gold/10 text-gold',
   credit_earned: 'bg-gold/10 text-gold',
-  badge_upgrade: 'bg-gold/10 text-gold',
-  circle_invite: 'bg-indigo-100 text-indigo-600',
+  proclamation_threshold: 'bg-gold/10 text-gold',
+  circle_invite: 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
+  circle_task: 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
+  mention: 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400',
+  system: 'bg-muted text-muted-foreground',
   default: 'bg-muted text-muted-foreground',
 }
 
@@ -92,14 +104,22 @@ export function NotificationsPage({
     switch (notification.type) {
       case 'vouch':
       case 'comment':
+      case 'mention':
         return data.postId ? `/post/${data.postId}` : '/'
       case 'follow':
         return data.userId ? `/profile/${data.userId}` : '/'
+      case 'challenge_verified':
       case 'challenge_approved':
       case 'challenge_rejected':
+      case 'ic_credited':
+      case 'credit_earned':
+      case 'proclamation_threshold':
         return data.challengeId ? `/challenges/${data.challengeId}` : '/challenges'
       case 'circle_invite':
+      case 'circle_task':
         return data.circleId ? `/community/${data.circleId}` : '/community'
+      case 'system':
+        return '/'
       default:
         return '/'
     }
@@ -108,7 +128,7 @@ export function NotificationsPage({
   return (
     <AppLayout user={user}>
       {/* Header */}
-      <div className="sticky top-0 lg:top-0 z-40 bg-white border-b border-border px-4 py-4">
+      <div className="sticky top-14 lg:top-0 z-40 w-full bg-background border-b border-border px-4 py-4 transition-colors duration-300">
         <h1 className="text-xl font-serif font-bold text-foreground">
           Notifications
         </h1>

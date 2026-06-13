@@ -102,7 +102,7 @@ export function ProfilePage({ profile, currentUser }: ProfilePageProps) {
   return (
     <AppLayout user={currentUser}>
       {/* Profile Header */}
-      <div className="bg-white border-b border-border">
+      <div className="bg-card border-b border-border transition-colors duration-300">
         {/* Avatar and Stats */}
         <div className="px-4 py-6">
           <div className="flex items-start gap-4">
@@ -117,7 +117,7 @@ export function ProfilePage({ profile, currentUser }: ProfilePageProps) {
               {profile.avatarUrl ? (
                 <img
                   src={profile.avatarUrl}
-                  alt={profile.displayName}
+                  alt={profile.displayName ?? 'Unknown User'}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
@@ -152,7 +152,7 @@ export function ProfilePage({ profile, currentUser }: ProfilePageProps) {
           <div className="mt-4">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-serif font-bold text-foreground">
-                {profile.displayName}
+                {profile.displayName ?? 'Unknown User'}
               </h1>
               <span
                 className={cn(
@@ -287,7 +287,7 @@ export function ProfilePage({ profile, currentUser }: ProfilePageProps) {
                 id={post.id}
                 author={{
                   id: profile.id,
-                  displayName: profile.displayName,
+                  displayName: profile.displayName ?? 'Unknown User',
                   avatarUrl: profile.avatarUrl,
                   badge: profile.badge as any,
                 }}

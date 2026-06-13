@@ -713,6 +713,12 @@ CREATE POLICY "Users can create submissions"
   ON challenge_submissions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+-- Users can update their own submissions
+CREATE POLICY "Users can update own submissions"
+  ON challenge_submissions FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- ============================================================================
 -- POSTS POLICIES
 -- ============================================================================

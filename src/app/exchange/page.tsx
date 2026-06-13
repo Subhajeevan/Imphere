@@ -1,9 +1,39 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ExchangePage } from './ExchangePage'
+import { USE_MOCK_DATA } from '@/lib/use-mock-data'
+import { mockData, USER_IDS } from '@/lib/mock-data'
 
 export default async function Page() {
-  const supabase = await createClient()
+  if (USE_MOCK_DATA) {
+    const profile = mockData.profiles.find(p => p.id === USER_IDS.arjun)
+    return (
+      <ExchangePage
+        user={
+          profile
+            ? {
+                displayName: profile.display_name,
+                avatarUrl: profile.avatar_url ?? undefined,
+                standing: profile.standing ?? 0,
+                badge: profile.badge ?? 'Citizen',
+              }
+            : undefined
+        }
+        impactCredits={profile?.impact_credits || 0}
+        vouchers={mockData.vouchers.map(v => ({
+          id: v.id,
+          title: v.title,
+          description: v.description ?? undefined,
+          image_url: v.image_url ?? undefined,
+          ic_cost: v.ic_cost,
+          stock: 10,
+          merchant_name: v.merchant_name || '',
+        }))}
+      />
+    )
+  }
+
+  const supabase = await createClient() as any as any
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -33,9 +63,9 @@ export default async function Page() {
         profile
           ? {
               displayName: profile.display_name,
-              avatarUrl: profile.avatar_url,
-              standing: profile.standing,
-              badge: profile.badge,
+              avatarUrl: profile.avatar_url ?? undefined,
+              standing: profile.standing ?? 0,
+              badge: profile.badge ?? 'Citizen',
             }
           : undefined
       }
@@ -44,3 +74,4 @@ export default async function Page() {
     />
   )
 }
+
