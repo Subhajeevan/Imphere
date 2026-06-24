@@ -1247,26 +1247,109 @@ const mockImpactCircleChats: Record<string, { roster: ImpactCircleRosterMember[]
 
 const mockImpactCircleStandings: Record<string, ImpactCircleStandingEntry[]> = {
   [CIRCLE_IDS.green]: [
-    { id: 's-g-1', user_id: USER_IDS.priya, rank: 1, displayName: 'Priya', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=PriyaVenkatesh', badge: 'Steward', weeklyPoints: 620, isActive: true },
-    { id: 's-g-2', user_id: USER_IDS.arjun, rank: 2, displayName: 'Arjun', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=ArjunMehta', badge: 'Principal', weeklyPoints: 590, isActive: true },
-    { id: 's-g-3', user_id: USER_IDS.rahul, rank: 3, displayName: 'Rahul', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=RahulSharma', badge: 'Member', weeklyPoints: 540, isActive: false },
-    { id: 's-g-4', user_id: USER_IDS.meera, rank: 4, displayName: 'Meera', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=MeeraIyer', badge: 'Member', weeklyPoints: 500, isActive: true },
-    { id: 's-g-5', user_id: USER_IDS.vikram, rank: 5, displayName: 'Vikram', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=VikramNair', badge: 'Member', weeklyPoints: 470, isActive: false },
+    { id: 's-g-1', user_id: USER_IDS.arjun,  rank: 1, displayName: 'Arjun',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ArjunMehta',    badge: 'Gold',    weeklyPoints: 620, isActive: true  },
+    { id: 's-g-2', user_id: USER_IDS.priya,  rank: 2, displayName: 'Priya',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=PriyaVenkatesh', badge: 'Gold',    weeklyPoints: 590, isActive: true  },
+    { id: 's-g-3', user_id: USER_IDS.rahul,  rank: 3, displayName: 'Rahul',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RahulSharma',    badge: 'Silver',  weeklyPoints: 540, isActive: false },
+    { id: 's-g-4', user_id: USER_IDS.meera,  rank: 4, displayName: 'Meera',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=MeeraIyer',      badge: 'Silver',  weeklyPoints: 500, isActive: true  },
+    { id: 's-g-5', user_id: USER_IDS.vikram, rank: 5, displayName: 'Vikram', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VikramNair',     badge: 'Bronze',  weeklyPoints: 470, isActive: false },
   ],
   [CIRCLE_IDS.blood]: [
-    { id: 's-b-1', user_id: USER_IDS.priya, rank: 1, displayName: 'Priya', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=PriyaVenkatesh', badge: 'Principal', weeklyPoints: 720, isActive: true },
-    { id: 's-b-2', user_id: USER_IDS.vikram, rank: 2, displayName: 'Vikram', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=VikramNair', badge: 'Steward', weeklyPoints: 680, isActive: true },
-    { id: 's-b-3', user_id: USER_IDS.arjun, rank: 3, displayName: 'Arjun', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=ArjunMehta', badge: 'Member', weeklyPoints: 640, isActive: false },
+    { id: 's-b-1', user_id: USER_IDS.arjun,  rank: 1, displayName: 'Arjun',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ArjunMehta',    badge: 'Gold',   weeklyPoints: 720, isActive: false },
+    { id: 's-b-2', user_id: USER_IDS.priya,  rank: 2, displayName: 'Priya',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=PriyaVenkatesh', badge: 'Gold',   weeklyPoints: 680, isActive: true  },
+    { id: 's-b-3', user_id: USER_IDS.vikram, rank: 3, displayName: 'Vikram', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VikramNair',     badge: 'Bronze', weeklyPoints: 640, isActive: true  },
   ],
   [CIRCLE_IDS.clean]: [
-    { id: 's-c-1', user_id: USER_IDS.kiran, rank: 1, displayName: 'Kiran', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=KiranReddy', badge: 'Principal', weeklyPoints: 800, isActive: true },
-    { id: 's-c-2', user_id: USER_IDS.ananya, rank: 2, displayName: 'Ananya', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=AnanyaGupta', badge: 'Steward', weeklyPoints: 770, isActive: true },
-    { id: 's-c-3', user_id: USER_IDS.dev, rank: 3, displayName: 'Dev', avatar_url: 'https://api.dicebear.com/7.x/identicon/svg?seed=DevPillai', badge: 'Member', weeklyPoints: 730, isActive: false },
+    { id: 's-c-1', user_id: USER_IDS.ananya, rank: 1, displayName: 'Ananya', avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AnanyaGupta',   badge: 'Bronze',  weeklyPoints: 800, isActive: true  },
+    { id: 's-c-2', user_id: USER_IDS.kiran,  rank: 2, displayName: 'Kiran',  avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=KiranReddy',    badge: 'Citizen', weeklyPoints: 770, isActive: true  },
+    { id: 's-c-3', user_id: USER_IDS.dev,    rank: 3, displayName: 'Dev',    avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DevPillai',     badge: 'Citizen', weeklyPoints: 730, isActive: false },
   ],
 }
 
 // ============================================================================
-// PART 16 — NOTIFICATIONS (6)
+// PART 16 — CIRCLE MESSAGES (9, 3 per circle — DB-layer shape)
+// These match the circle_messages table defined in migration 002.
+// API routes join these with mockProfiles to produce the presentation shape.
+// ============================================================================
+
+export interface MockCircleMessage {
+  id: string
+  circle_id: string
+  author_id: string
+  content: string
+  created_at: string
+}
+
+const mockCircleMessages: MockCircleMessage[] = [
+  // Hyderabad Green Warriors
+  {
+    id: 'msg-g-1',
+    circle_id: CIRCLE_IDS.green,
+    author_id: USER_IDS.priya,
+    content: 'The tree plantation drive is confirmed for Saturday. Can everyone bring saplings?',
+    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-g-2',
+    circle_id: CIRCLE_IDS.green,
+    author_id: USER_IDS.arjun,
+    content: 'Great. I will arrange the posters and local notifications.',
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-g-3',
+    circle_id: CIRCLE_IDS.green,
+    author_id: USER_IDS.rahul,
+    content: 'I can share the event with the neighbourhood committee as well.',
+    created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+  },
+  // AP Blood Donation Network
+  {
+    id: 'msg-b-1',
+    circle_id: CIRCLE_IDS.blood,
+    author_id: USER_IDS.vikram,
+    content: 'Hospital outreach planning is underway. We need at least 10 volunteers for the blood camp.',
+    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-b-2',
+    circle_id: CIRCLE_IDS.blood,
+    author_id: USER_IDS.priya,
+    content: 'Please confirm availability by tomorrow evening.',
+    created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-b-3',
+    circle_id: CIRCLE_IDS.blood,
+    author_id: USER_IDS.arjun,
+    content: 'I can help with donor registration and transport coordination.',
+    created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+  },
+  // Clean Hyderabad Initiative
+  {
+    id: 'msg-c-1',
+    circle_id: CIRCLE_IDS.clean,
+    author_id: USER_IDS.kiran,
+    content: 'The next cleanup route is the Old City market area. Let\'s meet at 7am.',
+    created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-c-2',
+    circle_id: CIRCLE_IDS.clean,
+    author_id: USER_IDS.ananya,
+    content: 'I have gloves and bags ready for the team.',
+    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg-c-3',
+    circle_id: CIRCLE_IDS.clean,
+    author_id: USER_IDS.dev,
+    content: 'I will lead the waste segregation briefing after the cleanup.',
+    created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+// ============================================================================
+// PART 17 — NOTIFICATIONS (6)
 // ============================================================================
 
 const mockNotifications: Tables<'notifications'>[] = [
@@ -1354,7 +1437,7 @@ const mockNotifications: Tables<'notifications'>[] = [
 ]
 
 // ============================================================================
-// PART 17 — VOUCHERS (4)
+// PART 18 — VOUCHERS (4)
 // ============================================================================
 
 const mockVouchers: Tables<'vouchers'>[] = [
@@ -1425,7 +1508,7 @@ const mockVouchers: Tables<'vouchers'>[] = [
 ]
 
 // ============================================================================
-// PART 18 — TRANSACTIONS (8)
+// PART 19 — TRANSACTIONS (8)
 // ============================================================================
 
 const mockTransactions: Tables<'transactions'>[] = [
@@ -1546,10 +1629,11 @@ export const mockData = {
   vouches:              mockVouches,
   saves:                mockSaves,
   follows:              mockFollows,
-  impactCircles:        mockImpactCircles,
-  impactCircleMembers:  mockImpactCircleMembers,
-  impactCircleChats:    mockImpactCircleChats,
+  impactCircles:         mockImpactCircles,
+  impactCircleMembers:   mockImpactCircleMembers,
+  impactCircleChats:     mockImpactCircleChats,
   impactCircleStandings: mockImpactCircleStandings,
+  circleMessages:        mockCircleMessages,
   notifications:        mockNotifications,
   vouchers:             mockVouchers,
   transactions:         mockTransactions,
@@ -1566,6 +1650,7 @@ export {
   VOUCHER_IDS,
   mockImpactCircleChats,
   mockImpactCircleStandings,
+  mockCircleMessages,
 }
 
 export type MockData = typeof mockData

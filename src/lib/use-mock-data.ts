@@ -1,2 +1,2 @@
-// Set this to false when real Supabase data is ready
-export const USE_MOCK_DATA = true
+// Set this to true only during local UI development without a live DB
+export const USE_MOCK_DATA = false

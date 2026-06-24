@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { CircleCard } from '@/components/community/CircleCard'
 import { cn } from '@/lib/utils'
-import { useCreatedCircles, CreatedCircle } from '@/hooks/useCreatedCircles'
 
 interface Circle {
   id: string
@@ -32,33 +31,37 @@ interface CommunityPageProps {
 }
 
 export function CommunityPage({ user, circles, discoverCircles }: CommunityPageProps) {
-  const { createdCircles } = useCreatedCircles()
   const [activeTab, setActiveTab] = useState<'my-circles' | 'discover'>('my-circles')
   const [searchQuery, setSearchQuery] = useState('')
-  const [joinedCircleIds, setJoinedCircleIds] = useState<string[]>(() => circles.map((circle) => circle.id))
 
-  useEffect(() => {
-    const createdJoinedIds = createdCircles.filter((circle) => circle.isJoined).map((circle) => circle.id)
-    setJoinedCircleIds((current) => Array.from(new Set([...current, ...createdJoinedIds])))
-  }, [createdCircles])
+  // Optimistic join state — maps circleId → true/false
+  const [joinOverrides, setJoinOverrides] = useState<Record<string, boolean>>({})
 
-  const joinedCircleSet = useMemo(() => new Set(joinedCircleIds), [joinedCircleIds])
-  const mergedDiscoverCircles = useMemo(() => {
-    const map = new Map<string, Circle | CreatedCircle>()
-    createdCircles.forEach((circle) => {
-      map.set(circle.id, circle)
-    })
-    discoverCircles.forEach((circle) => {
-      if (!map.has(circle.id)) {
-        map.set(circle.id, circle)
+  // Merge server-provided isJoined with optimistic overrides
+  function isJoined(circle: Circle): boolean {
+    if (circle.id in joinOverrides) return joinOverrides[circle.id]
+    return circle.isJoined ?? false
+  }
+
+  async function handleToggleJoin(circleId: string, currentlyJoined: boolean) {
+    // Optimistic update
+    setJoinOverrides(prev => ({ ...prev, [circleId]: !currentlyJoined }))
+
+    try {
+      const method = currentlyJoined ? 'DELETE' : 'POST'
+      const res = await fetch(`/api/circles/${circleId}/join`, { method })
+      if (!res.ok) {
+        // Revert on failure
+        setJoinOverrides(prev => ({ ...prev, [circleId]: currentlyJoined }))
       }
-    })
-    return Array.from(map.values())
-  }, [createdCircles, discoverCircles])
+    } catch {
+      setJoinOverrides(prev => ({ ...prev, [circleId]: currentlyJoined }))
+    }
+  }
 
   const filteredDiscoverCircles = useMemo(
     () =>
-      mergedDiscoverCircles.filter((circle) => {
+      discoverCircles.filter(circle => {
         const query = searchQuery.trim().toLowerCase()
         if (!query) return true
         return (
@@ -66,19 +69,22 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
           circle.category.toLowerCase().includes(query)
         )
       }),
-    [mergedDiscoverCircles, searchQuery]
+    [discoverCircles, searchQuery]
   )
 
   const myCircles = useMemo(
-    () => mergedDiscoverCircles.filter((circle) => joinedCircleSet.has(circle.id)),
-    [mergedDiscoverCircles, joinedCircleSet]
+    () => discoverCircles.filter(c => isJoined(c)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [discoverCircles, joinOverrides]
   )
 
-  const handleToggleJoin = (circleId: string) => {
-    setJoinedCircleIds((current) =>
-      current.includes(circleId) ? current.filter((id) => id !== circleId) : [...current, circleId]
-    )
-  }
+  // Seed myCircles with the server-provided joined circles so they show
+  // on first render even before the discover list is filtered
+  const displayedMyCircles = useMemo(() => {
+    const ids = new Set(myCircles.map(c => c.id))
+    const extra = circles.filter(c => !ids.has(c.id))
+    return [...myCircles, ...extra]
+  }, [myCircles, circles])
 
   return (
     <AppLayout user={user}>
@@ -89,7 +95,7 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
               <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">Impact Circles</p>
               <h1 className="mt-3 text-3xl font-serif font-bold text-foreground">Your circle network</h1>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Find the circles you have joined and discover new citizen-led groups with mock-backed data.
+                Find the circles you have joined and discover new citizen-led groups in your locality.
               </p>
             </div>
             <Link
@@ -101,18 +107,21 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
           </div>
         </div>
 
+        {/* Tabs */}
         <div className="flex flex-wrap gap-2">
           {[
             { id: 'my-circles', label: 'My Circles' },
-            { id: 'discover', label: 'Discover Circles' },
-          ].map((tab) => (
+            { id: 'discover',   label: 'Discover Circles' },
+          ].map(tab => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as 'my-circles' | 'discover')}
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-medium transition',
-                activeTab === tab.id ? 'bg-gold text-black' : 'bg-muted text-muted-foreground hover:bg-muted/70'
+                activeTab === tab.id
+                  ? 'bg-gold text-black'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/70'
               )}
             >
               {tab.label}
@@ -120,6 +129,7 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
           ))}
         </div>
 
+        {/* Discover tab */}
         {activeTab === 'discover' && (
           <div className="space-y-5">
             <div className="rounded-3xl border border-border bg-background p-4">
@@ -136,14 +146,12 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
               </div>
 
               <div className="mt-4">
-                <label htmlFor="circle-search" className="sr-only">
-                  Search circles
-                </label>
+                <label htmlFor="circle-search" className="sr-only">Search circles</label>
                 <input
                   id="circle-search"
                   type="search"
                   value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search circles by name or category"
                   className="w-full rounded-3xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20"
                 />
@@ -156,7 +164,7 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {filteredDiscoverCircles.map((circle) => (
+                {filteredDiscoverCircles.map(circle => (
                   <CircleCard
                     key={circle.id}
                     id={circle.id}
@@ -165,8 +173,8 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
                     category={circle.category}
                     memberCount={circle.member_count}
                     weeklyRank={circle.weeklyRank}
-                    isJoined={joinedCircleIds.includes(circle.id)}
-                    onToggleJoin={() => handleToggleJoin(circle.id)}
+                    isJoined={isJoined(circle)}
+                    onToggleJoin={() => handleToggleJoin(circle.id, isJoined(circle))}
                     href={`/community/${circle.id}`}
                   />
                 ))}
@@ -175,6 +183,7 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
           </div>
         )}
 
+        {/* My Circles tab */}
         {activeTab === 'my-circles' && (
           <div className="space-y-5">
             <div className="rounded-3xl border border-border bg-background p-4">
@@ -186,18 +195,18 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
                   </p>
                 </div>
                 <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-                  {myCircles.length} joined
+                  {displayedMyCircles.length} joined
                 </span>
               </div>
             </div>
 
-            {myCircles.length === 0 ? (
+            {displayedMyCircles.length === 0 ? (
               <div className="rounded-3xl border border-border bg-muted/30 p-8 text-center text-muted-foreground">
-                You haven’t joined any circles yet.
+                You haven't joined any circles yet. Switch to Discover Circles to find one.
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
-                {myCircles.map((circle) => (
+                {displayedMyCircles.map(circle => (
                   <CircleCard
                     key={circle.id}
                     id={circle.id}
@@ -208,7 +217,7 @@ export function CommunityPage({ user, circles, discoverCircles }: CommunityPageP
                     weeklyRank={circle.weeklyRank}
                     isJoined
                     userRank={circle.userRank}
-                    onToggleJoin={() => handleToggleJoin(circle.id)}
+                    onToggleJoin={() => handleToggleJoin(circle.id, true)}
                     href={`/community/${circle.id}`}
                   />
                 ))}
