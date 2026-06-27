@@ -3,15 +3,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Trophy, BarChart3, User, Bell, Plus } from 'lucide-react'
+import { Home, Search, Trophy, ShoppingBag, User, Bell, Plus, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const bottomNavItems = [
-  { href: '/',            icon: Home,       label: 'Home' },
-  { href: '/explore',     icon: Search,     label: 'Explore' },
-  { href: '/challenges',  icon: Trophy,     label: 'Challenges' },
-  { href: '/leaderboard', icon: BarChart3,  label: 'Leaders' },
-  { href: '/profile',     icon: User,       label: 'Profile' },
+  { href: '/',            icon: Home,        label: 'Home'       },
+  { href: '/explore',     icon: Search,      label: 'Explore'    },
+  { href: '/challenges',  icon: Trophy,      label: 'Challenges' },
+  { href: '/exchange',    icon: ShoppingBag, label: 'Exchange'   },
+  { href: '/leaderboard', icon: BarChart3,   label: 'Leaders'    },
+  { href: '/profile',     icon: User,        label: 'Profile'    },
 ]
 
 interface MobileNavProps {
@@ -69,13 +70,13 @@ export function MobileBottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 p-2 min-w-[60px]',
+                'flex flex-col items-center justify-center gap-0.5 flex-1 py-2',
                 'transition-colors',
                 isActive ? 'text-gold' : 'text-muted-foreground'
               )}
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-xs">{item.label}</span>
+              <span className="text-[10px] leading-none">{item.label}</span>
             </Link>
           )
         })}
