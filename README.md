@@ -1,7 +1,7 @@
 # IMPHERE
 
 <p align="center">
-  <img src="public/logo-gold.png" alt="IMPHERE Logo" width="300" />
+  <img src="public/logo-gold.png" alt="IMPHERE Logo" width="280" />
 </p>
 
 <p align="center">
@@ -9,19 +9,58 @@
 </p>
 
 <p align="center">
-  A civic engagement platform where citizens complete community challenges, earn reputation, and make real-world impact.
+  A civic engagement platform where citizens complete verified community challenges,
+  earn reputation, organise in groups, and redeem real-world rewards.
 </p>
 
 ---
 
 ## About
 
-IMPHERE is a government-commissioned civic engagement platform built for a local MLA in India. It gamifies community participation by rewarding users with:
+**IMPHERE** is a government-commissioned civic engagement platform built for a local
+MLA (Member of Legislative Assembly) in India. It turns real-world community
+participation into a transparent, gamified experience built on two currencies:
 
-- **Standing** - Non-spendable reputation score that determines your badge tier
-- **Impact Credits (IC)** - Spendable currency for vouchers and rewards
+- **Standing** — a non-spendable reputation score that determines your badge tier.
+- **Impact Credits (IC)** — spendable currency earned through impact and redeemed for rewards.
 
-Users can complete verified challenges, raise community issues (Proclamations), join Impact Circles, and build their civic influence through real-world actions.
+Because it is a **government-adjacent application**, security, auditability, and
+anti-fraud measures are first-class concerns — every credit transaction is logged,
+challenge submissions are geo-verified, and all data access is protected by
+row-level security.
+
+---
+
+## Features
+
+### 🏛️ Civic Core
+- **Feed** — posts with vouches (upvotes), comments, and saves.
+- **Challenges** — two tracks:
+  - *Welfare (static)* — admin-created civic tasks.
+  - *Proclamations* — community-raised local issues that must be backed to activate.
+- **Anti-cheat submissions** — camera-only photos with EXIF + GPS verified against the
+  target location (no gallery uploads).
+- **Leaderboard**, **notifications**, and **believers/believing** (follow graph).
+
+### 👥 Impact Circles
+- Community groups with membership roles (**principal / steward / member**),
+  an **eminence** score, and weekly **standings**.
+
+### 💬 Circle Chat & Direct Messages
+A full WhatsApp/Discord-style messaging experience, in circles **and** in 1-on-1 DMs:
+- Real-time rounded-bubble threads (Supabase Realtime)
+- 😊 Emoji **reactions** with live counts
+- 💬 **Reply** to a message (tap the preview to jump to the original)
+- 📷📄 **Attachments** — photos & documents (PDF/DOCX/PPT/XLSX/TXT/ZIP) via Cloudinary
+- 📍 **Live location** sharing → tappable Google Maps cards
+- 🔍 In-chat **search** with match highlighting
+- **Circles only:** 📊 polls (live percentages), 📢 leader announcements,
+  📌 pinned messages, and a 📂 **Shared Files** section in Circle Info
+
+### 🎁 Exchange
+An Impact-Credit marketplace with product catalog, categories, featured &
+recommended rails, daily deals, nearby offers, a wishlist, redemption history, and
+tier-gated **leaderboard rewards**. Voucher codes are securely redeemed.
 
 ---
 
@@ -29,90 +68,121 @@ Users can complete verified challenges, raise community issues (Proclamations), 
 
 | Layer | Technology |
 |-------|------------|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router, React 19) |
-| Language | [TypeScript](https://www.typescriptlang.org/) (Strict Mode) |
-| Database | [Supabase](https://supabase.com/) (PostgreSQL + PostGIS) |
-| Auth | Supabase Auth |
-| Styling | [Tailwind CSS](https://tailwindcss.com/) |
+| Framework | [Next.js 16](https://nextjs.org/) — App Router, Server Components, Server Actions |
+| UI | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) (strict) |
+| Database | [Supabase](https://supabase.com/) — PostgreSQL + PostGIS, Row Level Security, Realtime |
+| Auth | Supabase Auth — Google OAuth + email/password |
+| Media | [Cloudinary](https://cloudinary.com/) — images & raw file uploads |
+| Cache / rate-limit | [Upstash Redis](https://upstash.com/) |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) + shadcn-style primitives |
 | Icons | [Lucide React](https://lucide.dev/) |
-| Media | [Cloudinary](https://cloudinary.com/) |
-| Cache | [Upstash Redis](https://upstash.com/) |
+
+Brand accent: **gold `#D4AF37`**.
+
+---
+
+## Architecture at a Glance
+
+- **Rendering** — Server Components fetch data server-side; interactive views are
+  Client Components. Mutations go through Route Handlers (`src/app/api/**`) or
+  Server Actions.
+- **Two Supabase clients** ([src/lib/supabase/](src/lib/supabase/)):
+  - `createClient()` — user-scoped (respects RLS), used for reads and auth.
+  - `createAdminClient()` — **true service-role** client (bypasses RLS) for trusted
+    server-side writes only. Never imported into client components.
+- **Realtime** — chat messages, reactions, and poll votes are streamed via Supabase
+  Realtime; the relevant tables are added to the `supabase_realtime` publication in
+  the migrations.
+- **Security** — every table has RLS. Recursion-prone membership checks are wrapped
+  in `SECURITY DEFINER` SQL helpers (see migrations 006/007/008). Session refresh and
+  route protection live in [src/proxy.ts](src/proxy.ts).
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+- **Node.js 18.17+**
+- A **Supabase** project (PostgreSQL + PostGIS)
+- A **Cloudinary** account (media uploads)
+- *(Optional)* an **Upstash Redis** database
 
-- Node.js 18.17 or later
-- npm or yarn
-- Supabase account (for database)
-- Cloudinary account (for media uploads)
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd imphere-app
-```
-
-### 2. Install Dependencies
+### 1. Install
 
 ```bash
+git clone https://github.com/Subhajeevan/Imphere.git
+cd Imphere
 npm install
 ```
 
-### 3. Set Up Environment Variables
+### 2. Configure environment
 
-Create a `.env.local` file in the root directory:
+Create `.env.local` in the project root (see [Environment Variables](#environment-variables)).
 
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+### 3. Apply the database migrations
 
-# Cloudinary
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+In the **Supabase SQL Editor**, run the files in
+[supabase/migrations/](supabase/migrations/) **in order (001 → 008)**. They are
+idempotent, so re-running is safe.
 
-# Upstash Redis (optional)
-UPSTASH_REDIS_REST_URL=your_redis_url
-UPSTASH_REDIS_REST_TOKEN=your_redis_token
-```
+| # | File | Adds |
+|---|------|------|
+| 001 | `001_initial_schema.sql` | Core schema: profiles, follows, challenges, posts, circles, vouchers, notifications, transactions |
+| 002 | `002_circles_update.sql` | Circle categories + `circle_messages` + Realtime |
+| 003 | `003_missing_rls_policies.sql` | Additional RLS policies |
+| 004 | `004_exchange_schema.sql` | Exchange products, redemptions, wishlist |
+| 005 | `005_direct_messages.sql` | Conversations, participants, direct messages |
+| 006 | `006_fix_dm_rls_recursion.sql` | DM RLS recursion fix (SECURITY DEFINER helper) |
+| 007 | `007_circle_chat_enhancements.sql` | Reactions, polls, replies, attachments, location, pins, announcements |
+| 008 | `008_dm_chat_enhancements.sql` | Same rich features for direct messages |
 
-### 4. Set Up Supabase
+> Ensure **Realtime** is enabled for your project — the chat features depend on it.
 
-1. Create a new Supabase project
-2. Run the migrations in `supabase/migrations/` (if available)
-3. Or apply the schema from the Supabase dashboard
-
-### 5. Generate Database Types
+### 4. Generate typed database bindings
 
 ```bash
-npm run db:generate-types
+npm run db:generate-types   # writes src/types/database.types.ts
 ```
 
-This generates TypeScript types from your Supabase schema into `src/types/database.types.ts`.
-
-### 6. Run the Development Server
+### 5. Run
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Available Scripts
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|:--------:|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anon (public) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Service-role key — **server only**, bypasses RLS |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | ✅ | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | ✅ | Cloudinary API key (server) |
+| `CLOUDINARY_API_SECRET` | ✅ | Cloudinary API secret (server) |
+| `NEXT_PUBLIC_APP_URL` | ✅ | App base URL (e.g. `http://localhost:3000`) — used for server-side fetches |
+| `NEXT_PUBLIC_SITE_URL` | ➖ | Public site URL for OAuth redirects |
+| `UPSTASH_REDIS_REST_URL` | ➖ | Upstash Redis REST URL |
+| `UPSTASH_REDIS_REST_TOKEN` | ➖ | Upstash Redis REST token |
+
+> `.env.local` is gitignored and must never be committed.
+> On some Windows setups, corporate TLS interception can break Supabase/Cloudinary
+> calls in dev; if you hit `SELF_SIGNED_CERT_IN_CHAIN`, set
+> `NODE_TLS_REJECT_UNAUTHORIZED=0` in `.env.local` **for local development only**.
+
+---
+
+## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server with Turbopack |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
+| `npm run dev` | Start the dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Start the production server |
 | `npm run lint` | Run ESLint |
 | `npm run db:generate-types` | Generate TypeScript types from Supabase |
 
@@ -121,60 +191,99 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Project Structure
 
 ```
-imphere-app/
+Imphere/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── api/                # API route handlers
-│   │   ├── challenges/         # Challenge pages
-│   │   ├── profile/            # Profile pages
-│   │   ├── login/              # Auth pages
-│   │   ├── signup/
-│   │   └── ...
-│   ├── components/             # React components
-│   │   ├── layout/             # Navigation, sidebar, etc.
-│   │   ├── feed/               # Feed and post components
-│   │   └── challenges/         # Challenge components
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Utilities and clients
-│   │   ├── supabase/           # Supabase client setup
-│   │   └── utils.ts            # Helper functions
-│   ├── types/                  # TypeScript type definitions
-│   │   └── database.types.ts   # Auto-generated from Supabase
-│   └── proxy.ts                # Request proxy for auth
-├── public/                     # Static assets (logos, favicons)
-├── assets/                     # Source design files
-├── docs/                       # Documentation
-│   ├── PROGRESS.md             # Development progress tracker
-│   └── README.md               # Docs index
-└── CLAUDE.md                   # Development principles
+│   ├── app/                      # App Router: pages + API route handlers
+│   │   ├── api/                  # Route handlers (feed, challenges, circles, chats, exchange, users…)
+│   │   ├── challenges/           # Challenge list + submit
+│   │   ├── community/            # Impact Circles  (+ /[id]/chat full-screen thread)
+│   │   ├── chats/                # Direct messages: inbox + /[id] thread
+│   │   ├── exchange/             # IC marketplace
+│   │   ├── explore/  leaderboard/  notifications/  profile/  settings/
+│   │   ├── create/               # Create post / circle
+│   │   └── login/ signup/ onboarding/ ...   # Auth
+│   ├── components/
+│   │   ├── auth/                 # Google OAuth button, etc.
+│   │   ├── challenges/  feed/  layout/  ui/
+│   │   └── community/
+│   │       └── chat/             # Reusable chat UI (bubbles, input bar, reactions, polls, previews)
+│   ├── hooks/                    # useFeed, useImageUpload, useCircleThread, useDirectThread, …
+│   ├── lib/
+│   │   ├── supabase/             # client() + admin() factories
+│   │   ├── cloudinary.ts         # Signed uploads + chat attachments
+│   │   ├── redis.ts              # Upstash client
+│   │   └── utils.ts
+│   ├── types/                    # circle-chat.ts + generated database.types.ts
+│   └── proxy.ts                  # Supabase session refresh + route protection
+├── supabase/migrations/          # 001–008 SQL migrations (run in order)
+├── docs/                         # ADRs, feature docs, progress tracker
+├── public/                       # Logos & static assets
+└── CLAUDE.md                     # Engineering principles & standards
 ```
 
 ---
 
-## Key Concepts
+## Domain Glossary
 
-### Badge Tiers
+| Term | Meaning |
+|------|---------|
+| **Standing** | Non-spendable reputation score (like karma); drives your badge tier |
+| **Impact Credits (IC)** | Spendable currency for Exchange rewards |
+| **Believers / Believing** | Followers / following |
+| **Native Pin** | Your hometown (set once, changeable yearly) |
+| **Active Pin** | Current GPS location |
+| **Proclamation** | A user-raised local issue that needs community backing to activate |
+| **Impact Circle** | A community group for collective challenges |
+| **Vouch** | A like / upvote on a post |
+| **Eminence** | A circle's collective ranking score |
 
-Users progress through badge tiers based on Standing:
+**Badge tiers** (by Standing): Citizen → Bronze → Silver → Gold.
+**Exchange reward levels** (by lifetime IC): Citizen → Bronze → Silver → Gold → Platinum.
 
-| Badge | Standing Required | Ring Color |
-|-------|-------------------|------------|
-| Citizen | 0 | Gray |
-| Bronze | 500 | Bronze |
-| Silver | 2,000 | Silver |
-| Gold | 5,000 | Gold |
+---
 
-### Challenge Types
+## API Overview
 
-1. **Static (Welfare Track)** - Admin-created civic tasks
-2. **Proclamation** - Community-raised issues that need backing to activate
+All endpoints live under `src/app/api/**`. Highlights:
 
-### Anti-Cheat System
+**Feed & Posts** — `GET /api/feed`, `POST /api/posts`, `GET /api/search`, `POST /api/upload`
 
-Challenge submissions require:
-- Camera-captured photos (no gallery uploads)
-- EXIF metadata with GPS coordinates
-- Location verification within 50 meters of target
+**Challenges** — `GET /api/challenges`, `/challenges/categories`,
+`POST /challenges/create`, `/challenges/[id]/accept`, `/challenges/[id]/submit`
+
+**Circles** — `GET/POST /api/circles`, `/circles/[id]`, `/circles/[id]/join`,
+`/circles/[id]/members`
+- **Chat:** `/circles/[id]/thread`, `/circles/[id]/messages`,
+  `/circles/[id]/attachments`, `/circles/[id]/polls`, `/circles/[id]/announcements`,
+  `/circles/[id]/messages/[messageId]/pin`, `/circles/[id]/files`
+
+**Direct Messages** — `GET/POST /api/chats`, `/chats/[id]`,
+`/chats/[id]/messages`, `/chats/[id]/attachments`
+
+**Exchange** — `/exchange/products`, `/categories`, `/featured`, `/recommended`,
+`/offers`, `/history`, `/wishlist`, `/redeem`, `/leaderboard-rewards`
+
+**Users & Social** — `/user/me`, `/user/profile`, `/users/[id]`,
+`/users/[id]/posts`, `/users/[id]/challenges`, `/users/[id]/follow`
+
+**Vouchers** — `POST /api/vouchers/[id]/redeem`
+
+**Notifications** — `GET /api/notifications`, `POST /api/notifications/read`
+
+---
+
+## Security
+
+This is a government-adjacent application; security is non-negotiable:
+
+- **Row Level Security** on every table; membership checks use `SECURITY DEFINER`
+  helpers to stay correct and non-recursive.
+- **Service-role isolation** — privileged writes only via `createAdminClient()` in
+  server code; secrets are never exposed to the client.
+- **Anti-fraud** — camera-only submissions with EXIF + geolocation verification.
+- **Server-side validation** — uploads are MIME/size-checked before hitting Cloudinary;
+  leader-only actions (announcements, pins) are enforced on the server.
+- **Auditability** — Standing/IC movements are recorded in `transactions`.
 
 ---
 
@@ -182,71 +291,27 @@ Challenge submissions require:
 
 | Document | Description |
 |----------|-------------|
-| [docs/PROGRESS.md](docs/PROGRESS.md) | Detailed progress tracker with all features |
-| [CLAUDE.md](CLAUDE.md) | Development principles and coding standards |
+| [CLAUDE.md](CLAUDE.md) | Engineering principles & coding standards |
+| [PRODUCT_SPECIFICATION.md](PRODUCT_SPECIFICATION.md) | Product requirements |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | Development progress tracker |
+| [docs/adr/](docs/adr/) | Architecture Decision Records |
 | [docs/README.md](docs/README.md) | Technical documentation index |
-
----
-
-## API Overview
-
-### Feed
-- `GET /api/feed` - Fetch paginated posts
-
-### Challenges
-- `GET /api/challenges` - List challenges
-- `GET /api/challenges/categories` - Get categories
-- `POST /api/challenges/[id]/accept` - Accept a challenge
-
-### Users
-- `GET /api/users/[id]` - Get user profile
-- `GET /api/users/[id]/posts` - Get user's posts
-- `GET /api/users/[id]/challenges` - Get verified submissions
-- `POST|DELETE /api/users/[id]/follow` - Toggle follow
-
----
-
-## Development Notes
-
-### Code Style
-
-- TypeScript strict mode enabled
-- No `any` types
-- Early returns to reduce nesting
-- Functions under 50 lines
-- Colocation of related code
-
-### Database
-
-- All queries through Supabase client (type-safe)
-- Row Level Security (RLS) enabled on all tables
-- PostGIS for location-based features
-
-### Security Considerations
-
-This is a government-adjacent application with strict security requirements:
-- EXIF verification for submissions
-- Encrypted voucher codes (AES-256)
-- Full audit trail for all transactions
-- No client-side exposure of secrets
 
 ---
 
 ## Contributing
 
-1. Read [CLAUDE.md](CLAUDE.md) for development principles
-2. Check [docs/PROGRESS.md](docs/PROGRESS.md) for current status
-3. Follow existing patterns in the codebase
-4. Ensure no TypeScript errors before committing
+1. Read [CLAUDE.md](CLAUDE.md) — extensibility, clarity, and production-grade standards.
+2. Match existing patterns; keep TypeScript strict (no `any`).
+3. Ensure `npx tsc --noEmit` passes before committing.
+4. If you add a DB-backed feature, ship a new numbered migration and keep it idempotent.
 
 ---
 
 ## License
 
-Private - All rights reserved.
-
----
+Private — all rights reserved.
 
 <p align="center">
-  <sub>A civic initiative for community empowerment</sub>
+  <sub>A civic initiative for community empowerment.</sub>
 </p>
