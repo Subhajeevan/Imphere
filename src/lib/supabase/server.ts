@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createServiceRoleClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database.types'
 
@@ -60,8 +61,15 @@ export async function createClient(): Promise<any> {
 }
 
 /**
- * Creates an admin Supabase client with service role key
- * USE WITH CAUTION - bypasses Row Level Security
+ * Creates an admin Supabase client with the service role key.
+ * USE WITH CAUTION - bypasses Row Level Security.
+ *
+ * IMPORTANT: this must NOT be built from `createServerClient` with cookies.
+ * Doing so makes supabase-js send the logged-in user's JWT as the
+ * `Authorization` header, which overrides the service-role key — so requests
+ * run as the authenticated user and RLS is still enforced. We use the plain
+ * `@supabase/supabase-js` client with no session persistence so the
+ * service-role key is the only credential, and RLS is genuinely bypassed.
  *
  * Only use for:
  * - server processes
@@ -69,25 +77,13 @@ export async function createClient(): Promise<any> {
  * - trusted internal workflows where bypassing RLS is required
  */
 export async function createAdminClient(): Promise<any> {
-  const cookieStore = await cookies()
-
-  return createServerClient<Database>(
+  return createServiceRoleClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet: SupabaseCookie[]) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options as any)
-            )
-          } catch {
-            // Ignore in Server Components
-          }
-        },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   )

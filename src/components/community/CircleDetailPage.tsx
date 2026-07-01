@@ -4,10 +4,11 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ChatTab } from '@/components/community/ChatTab'
+import { SharedFilesPanel } from '@/components/community/chat/SharedFilesPanel'
 import { LeaderboardItem } from '@/components/community/LeaderboardItem'
 import { useCircleChat } from '@/hooks/useCircleChat'
 import { cn, formatCompactNumber } from '@/lib/utils'
-import { ArrowLeft, MessageSquare, Trophy } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 
 interface CircleDetailPageProps {
   circle: {
@@ -38,7 +39,7 @@ interface CircleDetailPageProps {
 }
 
 export function CircleDetailPage({ circle, standings, user }: CircleDetailPageProps) {
-  const [activeTab, setActiveTab] = useState<'chat' | 'standings'>('chat')
+  const [activeTab, setActiveTab] = useState<'chat' | 'standings' | 'files'>('chat')
   const { roster, messages, isLoading, sendMessage } = useCircleChat(circle.id)
 
   const currentUserEntry = useMemo(
@@ -73,6 +74,13 @@ export function CircleDetailPage({ circle, standings, user }: CircleDetailPagePr
               <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">Circle details</p>
               <h1 className="mt-2 text-3xl font-serif font-bold text-foreground">{circle.name}</h1>
               <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{circle.description}</p>
+              <Link
+                href={`/community/${circle.id}/chat`}
+                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-gold px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-gold-dark"
+              >
+                <Sparkles className="w-4 h-4" />
+                Open Circle Chat
+              </Link>
             </div>
             <div className="grid gap-2 text-right text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{circle.member_count} members</span>
@@ -105,11 +113,12 @@ export function CircleDetailPage({ circle, standings, user }: CircleDetailPagePr
           {[
             { id: 'chat', label: 'Chat' },
             { id: 'standings', label: 'Standings' },
+            { id: 'files', label: 'Shared Files' },
           ].map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as 'chat' | 'standings')}
+              onClick={() => setActiveTab(tab.id as 'chat' | 'standings' | 'files')}
               className={cn(
                 'rounded-full px-4 py-2 text-sm font-medium transition',
                 activeTab === tab.id ? 'bg-gold text-black' : 'bg-muted text-muted-foreground hover:bg-muted/70'
@@ -128,6 +137,8 @@ export function CircleDetailPage({ circle, standings, user }: CircleDetailPagePr
             isLoading={isLoading}
             onSendMessage={sendMessage}
           />
+        ) : activeTab === 'files' ? (
+          <SharedFilesPanel circleId={circle.id} />
         ) : (
           <div className="space-y-5">
             <div className="rounded-3xl border border-border bg-card p-4">

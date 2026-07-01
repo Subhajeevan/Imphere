@@ -2,6 +2,7 @@
 
 import { Sidebar } from './Sidebar'
 import { MobileTopBar, MobileBottomNav } from './MobileNav'
+import { cn } from '@/lib/utils'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -12,32 +13,46 @@ interface AppLayoutProps {
     badge: string
   }
   notificationCount?: number
+  /**
+   * fullBleed: removes max-w-2xl wrapper and makes main fill the full viewport
+   * height. Used for pages like chat that need a fixed header + scrollable body
+   * + fixed footer layout.
+   */
+  fullBleed?: boolean
 }
 
-export function AppLayout({ children, user, notificationCount }: AppLayoutProps) {
+export function AppLayout({ children, user, notificationCount, fullBleed }: AppLayoutProps) {
   return (
-    /* overflow-x-hidden on root prevents any child from causing horizontal scroll */
-    <div className="min-h-screen w-full overflow-x-hidden bg-background text-foreground transition-colors duration-300">
-      {/* Mobile Navigation */}
-      <MobileTopBar notificationCount={notificationCount} />
+    <div className={cn(
+      'w-full overflow-x-hidden bg-background text-foreground transition-colors duration-300',
+      fullBleed ? 'h-screen overflow-hidden' : 'min-h-screen',
+    )}>
+      {/* Mobile top bar — fixed, height 56px (h-14) */}
+      <MobileTopBar user={user} />
 
-      <div className="flex w-full">
-        {/* Desktop Sidebar */}
+      <div className={cn('flex w-full', fullBleed && 'h-full')}>
+        {/* Desktop sidebar */}
         <Sidebar user={user} />
 
-        {/* Main Content
-            min-w-0   → flex children don't shrink below content by default; this forces correct sizing
-            w-full    → take full remaining width (not wider than parent)
-            overflow-x-hidden → belt-and-suspenders clip for any sticky children */}
-        <main className="flex-1 min-w-0 w-full overflow-x-hidden min-h-screen pt-14 pb-16 lg:pt-0 lg:pb-0">
-          <div className="max-w-2xl mx-auto w-full">
-            {children}
-          </div>
+        {/* Main content */}
+        <main className={cn(
+          'flex-1 min-w-0 w-full overflow-x-hidden',
+          fullBleed
+            ? 'flex flex-col overflow-hidden pt-14 pb-16 lg:pt-0 lg:pb-0'
+            : 'min-h-screen pt-14 pb-16 lg:pt-0 lg:pb-0',
+        )}>
+          {fullBleed ? (
+            children
+          ) : (
+            <div className="max-w-2xl mx-auto w-full">
+              {children}
+            </div>
+          )}
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {/* Mobile bottom navigation — fixed */}
+      <MobileBottomNav notificationCount={notificationCount} />
     </div>
   )
 }

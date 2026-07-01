@@ -273,22 +273,30 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
 // ── Bottom nav link helper ────────────────────────────────────────────────────
 
 function BottomNavLink({
-  href, icon: Icon, label, active,
+  href, icon: Icon, label, active, badge = 0,
 }: {
   href: string
   icon: React.ElementType
   label: string
   active: boolean
+  badge?: number
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        'flex-1 flex flex-col items-center justify-end gap-0.5 pb-2 transition-colors',
+        'flex-1 flex flex-col items-center justify-end gap-0.5 pb-2 pt-2 transition-colors',
         active ? 'text-gold' : 'text-muted-foreground',
       )}
     >
-      <Icon className="w-5 h-5" />
+      <div className="relative">
+        <Icon className="w-5 h-5" />
+        {badge > 0 && (
+          <span className="absolute -top-1.5 -right-2 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+            {badge > 9 ? '9+' : badge}
+          </span>
+        )}
+      </div>
       <span className="text-[10px] leading-none">{label}</span>
     </Link>
   )
@@ -296,8 +304,9 @@ function BottomNavLink({
 
 // ── Mobile Top Bar ────────────────────────────────────────────────────────────
 
-export function MobileTopBar({ user, notificationCount = 0 }: MobileNavProps) {
+export function MobileTopBar({ user }: MobileNavProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
 
   return (
     <>
@@ -338,65 +347,39 @@ export function MobileTopBar({ user, notificationCount = 0 }: MobileNavProps) {
             />
           </Link>
 
-          {/* Right — Notifications */}
-          <Link
-            href="/notifications"
-            className="relative p-2 -mr-2 rounded-full hover:bg-muted transition-colors"
-            aria-label="Notifications"
+          {/* Right — Create */}
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="w-9 h-9 rounded-full bg-gold flex items-center justify-center shadow-md shadow-gold/30 hover:bg-gold-dark transition-colors -mr-0.5"
+            aria-label="Create"
           >
-            <Bell className="w-6 h-6 text-foreground" />
-            {notificationCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
-                {notificationCount > 9 ? '9+' : notificationCount}
-              </span>
-            )}
-          </Link>
+            <Plus className="w-5 h-5 text-white" />
+          </button>
         </div>
       </header>
 
       {drawerOpen && (
         <ProfileDrawer user={user} onClose={() => setDrawerOpen(false)} />
       )}
+      {createOpen && <CreateSheet onClose={() => setCreateOpen(false)} />}
     </>
   )
 }
 
 // ── Mobile Bottom Nav ─────────────────────────────────────────────────────────
 
-export function MobileBottomNav() {
-  const pathname    = usePathname()
-  const [createOpen, setCreateOpen] = useState(false)
+export function MobileBottomNav({ notificationCount = 0 }: { notificationCount?: number }) {
+  const pathname = usePathname()
 
   return (
-    <>
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border safe-area-inset-bottom shadow-[0_-1px_12px_rgba(0,0,0,0.06)]">
-        <div className="flex items-end h-16 px-1">
-
-          {/* Home */}
-          <BottomNavLink href="/"          icon={Home}           label="Home"       active={pathname === '/'} />
-          {/* Search */}
-          <BottomNavLink href="/explore"   icon={Search}         label="Search"     active={pathname.startsWith('/explore')} />
-
-          {/* Create — elevated gold button in the center */}
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="flex-1 flex flex-col items-center justify-end pb-2"
-            aria-label="Create"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-gold shadow-lg shadow-gold/30 flex items-center justify-center -mt-5">
-              <Plus className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-[10px] leading-none text-muted-foreground mt-1">Create</span>
-          </button>
-
-          {/* Challenges */}
-          <BottomNavLink href="/challenges" icon={Trophy}         label="Challenges" active={pathname.startsWith('/challenges')} />
-          {/* Chats → Community circles */}
-          <BottomNavLink href="/community"  icon={MessageCircle}  label="Chats"      active={pathname.startsWith('/community')} />
-        </div>
-      </nav>
-
-      {createOpen && <CreateSheet onClose={() => setCreateOpen(false)} />}
-    </>
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border safe-area-inset-bottom shadow-[0_-1px_12px_rgba(0,0,0,0.06)]">
+      <div className="flex items-stretch h-16 px-1">
+        <BottomNavLink href="/"             icon={Home}          label="Home"       active={pathname === '/'} />
+        <BottomNavLink href="/explore"      icon={Search}        label="Search"     active={pathname.startsWith('/explore')} />
+        <BottomNavLink href="/challenges"   icon={Trophy}        label="Challenges" active={pathname.startsWith('/challenges')} />
+        <BottomNavLink href="/notifications" icon={Bell}         label="Alerts"     active={pathname.startsWith('/notifications')} badge={notificationCount} />
+        <BottomNavLink href="/chats"        icon={MessageCircle} label="Chats"      active={pathname.startsWith('/chats')} />
+      </div>
+    </nav>
   )
 }

@@ -24,6 +24,7 @@ export const CLOUDINARY_FOLDERS = {
   CHALLENGE_SUBMISSIONS: 'imphere/challenges',
   POST_MEDIA: 'imphere/posts',
   CIRCLE_BANNERS: 'imphere/circles',
+  CIRCLE_CHAT: 'imphere/circle-chat',
 } as const
 
 /**
@@ -99,6 +100,48 @@ export function generateUploadSignature(
     apiKey: process.env.CLOUDINARY_API_KEY!,
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
     folder: presetConfig.folder,
+  }
+}
+
+/**
+ * Upload a circle-chat attachment (server-side).
+ *
+ * Images go to Cloudinary as `image` (so we can derive thumbnails); documents
+ * go as `raw` so any file type (PDF/DOCX/PPT/XLSX/TXT/ZIP) is stored verbatim.
+ *
+ * `source` is a data URI (`data:<mime>;base64,<...>`).
+ */
+export async function uploadChatAttachment(
+  source: string,
+  kind: 'image' | 'document',
+  originalName: string,
+): Promise<{
+  publicId: string
+  secureUrl: string
+  thumbnailUrl?: string
+  width?: number
+  height?: number
+  bytes: number
+}> {
+  const result = await cloudinary.uploader.upload(source, {
+    folder: CLOUDINARY_FOLDERS.CIRCLE_CHAT,
+    resource_type: kind === 'image' ? 'image' : 'raw',
+    // Preserve a sensible filename for downloads (raw files keep their name)
+    use_filename: true,
+    unique_filename: true,
+    filename_override: originalName,
+  })
+
+  return {
+    publicId:  result.public_id,
+    secureUrl: result.secure_url,
+    bytes:     result.bytes,
+    width:     result.width,
+    height:    result.height,
+    thumbnailUrl:
+      kind === 'image'
+        ? getImageUrl(result.public_id, { width: 600, crop: 'limit', quality: 'auto', format: 'auto' })
+        : undefined,
   }
 }
 

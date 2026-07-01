@@ -14,16 +14,17 @@ import {
   Settings,
   Plus,
   BarChart3,
+  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/',            icon: Home,      label: 'Home' },
-  { href: '/explore',     icon: Search,    label: 'Explore' },
-  { href: '/challenges',  icon: Trophy,    label: 'Challenges' },
-  { href: '/leaderboard', icon: BarChart3, label: 'Leaderboard' },
-  { href: '/community',   icon: Users,     label: 'Community' },
-  // { href: '/profile',     icon: User,      label: 'Profile' },
+  { href: '/',            icon: Home,          label: 'Home' },
+  { href: '/explore',     icon: Search,        label: 'Explore' },
+  { href: '/challenges',  icon: Trophy,        label: 'Challenges' },
+  { href: '/leaderboard', icon: BarChart3,     label: 'Leaderboard' },
+  { href: '/community',   icon: Users,         label: 'Community' },
+  { href: '/chats',       icon: MessageCircle, label: 'Chats' },
 ]
 
 const secondaryItems = [

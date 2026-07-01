@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     let products = (data ?? []).map(mapRow)
 
     if (search) {
-      products = products.filter(p =>
+      products = products.filter((p: ExchangeProduct) =>
         p.name.toLowerCase().includes(search) ||
         p.brandName.toLowerCase().includes(search) ||
         p.tags.some((t: string) => t.includes(search)),
